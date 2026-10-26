@@ -1,0 +1,14 @@
+{
+  "name": "vibelabs-sdlc",
+  "version": "0.4.0",
+  "description": "AI-Native SDLC 하네스 설치기 — Claude Code 플러그인(스킬·에이전트·결정적 게이트 CLI)",
+  "license": "MIT",
+  "author": "vibelabs-web",
+  "homepage": "https://github.com/vibelabs-web/vibelabs-native-sdlc",
+  "repository": {"type": "git", "url": "git+https://github.com/vibelabs-web/vibelabs-native-sdlc.git"},
+  "bin": {"vibelabs-sdlc": "bin/vibelabs-sdlc.js"},
+  "files": ["bin/", "skills/", "agents/", "scripts/", "schemas/", "templates/", "docs/", "evals/", "examples/",
+            ".claude-plugin/", "install.sh"],
+  "engines": {"node": ">=18"},
+  "keywords": ["claude-code", "plugin", "sdlc", "qc", "spec"]
+}

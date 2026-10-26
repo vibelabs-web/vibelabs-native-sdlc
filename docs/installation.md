@@ -19,6 +19,21 @@ Claude Code 세션에서:
 
 - 지원: Claude Code CLI·데스크톱·IDE. **claude.ai/code 클라우드 세션은 로컬에서 설치한 플러그인을 로드하지 않는다**(조직 managed settings 배포만 예외). claude.ai 채팅에 zip 업로드는 스킬만 로드하고 에이전트를 무시하며 git·python 실행 환경이 없어 **미지원**.
 
+## 1-0. npx 한 줄 설치
+
+```bash
+npx github:vibelabs-web/vibelabs-native-sdlc            # 플러그인 설치·업데이트 (user 범위)
+npx github:vibelabs-web/vibelabs-native-sdlc --scope project
+npx github:vibelabs-web/vibelabs-native-sdlc --copy     # 플러그인 대신 ~/.claude/vibelabs-sdlc 복사 + 심링크
+npx github:vibelabs-web/vibelabs-native-sdlc --check    # 상태만
+npx github:vibelabs-web/vibelabs-native-sdlc --remove   # 이 설치기가 만든 것만 제거
+```
+
+- npm 등록 없이 GitHub 에서 받아 `bin/vibelabs-sdlc.js`(Node 18+, 외부 의존성 없음)를 실행한다.
+- `claude` 명령이 있으면 §1 의 플러그인 명령을 대신 실행하고(이미 있으면 update), 없으면 복사 설치로 넘어간다.
+- 복사 설치는 기존 스킬·에이전트나 이 설치기가 만들지 않은 `~/.claude/vibelabs-sdlc` 를 **덮어쓰지 않고 중단**한다. 복사 설치의 진입은 접두사 없는 `/sdlc`.
+- `package.json` 과 `plugin.json` 의 version 은 CI 가 같게 유지시킨다.
+
 ## 1-1. 개발용: 레포 심링크 (이 레포를 고치는 사람)
 
 ```bash
