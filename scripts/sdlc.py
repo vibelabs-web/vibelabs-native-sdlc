@@ -161,6 +161,30 @@ def cmd_approve(args):
     return 0
 
 
+def cmd_approve_github(args):
+    """GitHub PR 리뷰를 승인 원본으로 등록한다. 진위는 등록 시점과 매 게이트마다 GitHub API 로 다시 확인한다."""
+    from core import github
+    ch = project(args).load(args.change_id)
+    scope = args.scope
+    if not github.parse_review_url(args.review):
+        raise SdlcError("--review 는 https://github.com/<owner>/<repo>/pull/<n>#pullrequestreview-<id> 형식")
+    root = ch.project.root
+    rec = g.make_github_record(ch, scope, args.review)
+    missing = [a for a, v in rec["bound"].items() if v is None]
+    if missing:
+        raise SdlcError(f"승인 대상 없음: {missing}")
+    vr = approvals.verify(root, ch.id, rec)
+    rec["approver"] = vr.actor
+    if vr.status == approvals.INVALID:
+        print(f"거부: {vr.reason}", file=sys.stderr)
+        return 1
+    ch.state.setdefault("approvals", {})[scope] = rec
+    ch.record("approval", scope=scope, kind="github_review", ref=args.review, approver=vr.actor, verify=vr.status)
+    ch.save()
+    print(f"기록: {scope} ← {args.review} ({vr.status} {vr.level}: {vr.reason})")
+    return 0 if vr.status == approvals.VERIFIED else 3
+
+
 def cmd_gate(args):
     ch = project(args).load(args.change_id)
     res = g.gate(ch, args.stage)
@@ -346,6 +370,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp = add("approve", cmd_approve, "로컬 TTY 승인 기록 (E1 — high-risk/release 불인정)", json_=False)
     sp.add_argument("change_id")
     sp.add_argument("scope", choices=list(sm.APPROVAL_SCOPES))
+    sp = add("approve-github", cmd_approve_github, "GitHub PR 리뷰를 승인 원본으로 등록 (E2, API 로 검증)", json_=False)
+    sp.add_argument("change_id")
+    sp.add_argument("scope", choices=list(sm.APPROVAL_SCOPES))
+    sp.add_argument("--review", required=True, help="PR 리뷰 URL (…/pull/N#pullrequestreview-ID)")
     sp = add("gate", cmd_gate, "단계 전이 판정 (ALLOW 시 적용)")
     sp.add_argument("change_id")
     sp.add_argument("stage", choices=sm.STAGES)
