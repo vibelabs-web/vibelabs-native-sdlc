@@ -233,7 +233,25 @@ def bugs_open(ch) -> bool:
 
 
 def cmd_bug(args):
+    from core import bugtracker, github
+    if args.bug_cmd == "board":
+        p = project(args)
+        text = bugtracker.board(p)
+        print(text if not args.json else json.dumps({"path": str(p.sdlc_dir / "BUGS.md")}))
+        return 0
     ch = project(args).load(args.change_id)
+    if args.bug_cmd == "sync":
+        try:
+            events = bugtracker.sync(ch, dry_run=args.dry_run)
+        except github.GhUnavailable as e:
+            print(f"GitHub 동기화 불가: {e}", file=sys.stderr)
+            return 3
+        out(args, events, "\n".join(events) or "동기화할 BUG 없음")
+        return 0
+    if args.bug_cmd == "comment":
+        b = bugs.get(ch, args.bug_id)
+        print(bugtracker.comment(ch, b, args.role, args.body))
+        return 0
     if args.bug_cmd == "list":
         rows = [{"id": b.id, **b.meta} for b in bugs.load_all(ch)]
         out(args, rows, "\n".join(f"{r['id']}  {r.get('status'):<16} {r.get('severity'):<8} "
@@ -402,11 +420,22 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("bug", help="결함 티켓")
     bsub = sp.add_subparsers(dest="bug_cmd", required=True)
-    for name in ("list", "new", "transition", "classify"):
-        b = bsub.add_parser(name)
+    bug_help = {"list": "BUG 목록", "new": "수동 BUG 발행", "transition": "상태 전이 (역할 규칙 적용)",
+                "classify": "defect/flaky/infra/oracle 분류", "sync": "BUG ↔ GitHub Issue 동기화 (댓글 주고받기)",
+                "comment": "QC·Builder 대화 남기기 (로컬 Discussion + Issue 댓글)", "board": "전체 버그 보드 .sdlc/BUGS.md"}
+    for name in ("list", "new", "transition", "classify", "sync", "comment", "board"):
+        b = bsub.add_parser(name, help=bug_help[name])
         b.set_defaults(fn=cmd_bug)
         b.add_argument("--json", action="store_true")
+        if name == "board":
+            continue
         b.add_argument("change_id")
+        if name == "sync":
+            b.add_argument("--dry-run", action="store_true")
+        if name == "comment":
+            b.add_argument("bug_id")
+            b.add_argument("--role", required=True, choices=["builder", "qc-verifier", "qc-architect", "human"])
+            b.add_argument("--body", required=True)
         if name in ("transition", "classify"):
             b.add_argument("bug_id")
             b.add_argument("--role", required=True, choices=["builder", "qc-verifier", "qc-architect", "human"])
