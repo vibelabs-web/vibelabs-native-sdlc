@@ -66,6 +66,18 @@
       },
       "at": "2026-10-26T10:30:35Z",
       "approver": "vibelabs-sdlc-gatekeeper[bot]"
+    },
+    "release": {
+      "scope": "release",
+      "kind": "github_review",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650781399",
+      "bound": {
+        "commit": "42ee980dadfcae108c4942db13051eed8957b94e",
+        "qc_run": "RUN-003"
+      },
+      "paths": {},
+      "at": "2026-10-26T10:43:24Z",
+      "approver": "vibelabs-sdlc-gatekeeper[bot]"
     }
   },
   "qc_lock": {
@@ -147,7 +159,9 @@
   "retry_budget": {
     "per_defect": 3
   },
-  "blocked_reasons": [],
+  "blocked_reasons": [
+    "[ERROR] CI_CHECK_FAILED: 필수 체크 'validate' = ['failure'] @ 42ee980dadfc"
+  ],
   "known_ids": [
     "REQ-001",
     "REQ-002",
@@ -365,7 +379,28 @@
       "from": "QC_PASSED",
       "to": "REVIEW_PENDING",
       "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:43:26Z",
+      "event": "approval",
+      "scope": "release",
+      "kind": "github_review",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650781399",
+      "approver": "vibelabs-sdlc-gatekeeper[bot]",
+      "auto": true
+    },
+    {
+      "at": "2026-10-26T10:43:36Z",
+      "event": "gate_refused",
+      "to": "RELEASE_APPROVED",
+      "decision": "MANUAL_VERIFICATION_REQUIRED"
+    },
+    {
+      "at": "2026-10-26T10:44:25Z",
+      "event": "gate_refused",
+      "to": "RELEASE_APPROVED",
+      "decision": "BLOCK"
     }
   ],
-  "updated_at": "2026-10-26T10:42:20Z"
+  "updated_at": "2026-10-26T10:44:25Z"
 }
