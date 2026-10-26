@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from core import hashing
+from core import gitutil, hashing
 from core.util import canonical_json, read_json
 from validators import schema
 from validators.issues import Issue, err
@@ -41,7 +41,7 @@ def verify(change, run: dict, head: str | None) -> list[Issue]:
         issues.append(err("EVIDENCE_NO_COMMIT", f"{rid} 에 고정 커밋 SHA 없음 — E0 증거로 게이트 불가", f))
     elif head is None:
         issues.append(err("NO_HEAD", "현재 커밋을 확인할 수 없음 — 증거 대조 불가", f))
-    elif run["commit_sha"] != head:
+    elif not gitutil.same_code(change.project.root, run["commit_sha"], head):
         issues.append(err("STALE_EVIDENCE_SHA",
                           f"{rid} 는 {run['commit_sha'][:12]} 에서 실행됨, 현재 HEAD {head[:12]} — 새 SHA 로 재실행 필요", f))
     if run["worktree_dirty"]:

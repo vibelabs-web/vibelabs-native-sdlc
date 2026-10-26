@@ -70,3 +70,19 @@ def branch_changed_files(root: Path, base: str, upstream: str | None) -> list[st
     if r.returncode != 0:
         return None
     return sorted({p for p in r.stdout.splitlines() if p.strip()})
+
+
+def same_code(root: Path, a: str | None, b: str | None) -> bool:
+    """a 와 b 가 같은 제품 코드인가: 같은 커밋이거나, a 가 b 의 조상이고 그 사이 변경이 `.sdlc/` 뿐.
+
+    자율 모드에서는 상태·증거를 PR 에 올리려고 커밋하므로, 그 커밋 때문에 증거가 무효가 되면 끝나지 않는다.
+    `.sdlc/` 안의 기준 문서·QC 자산은 기준선·잠금 해시가 따로 지킨다.
+    """
+    if not a or not b:
+        return False
+    if a == b:
+        return True
+    if _git(root, "merge-base", "--is-ancestor", a, b).returncode != 0:
+        return False
+    files = changed_files(root, a, b)
+    return files is not None and all(f.startswith(".sdlc/") for f in files)

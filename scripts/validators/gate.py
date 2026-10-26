@@ -130,8 +130,8 @@ def _verify_approval(change, scope: str, res: GateResult) -> str | None:
             res.block(err("APPROVAL_STALE", f"{scope} 승인 후 {art} 변경됨 — 이전 승인 무효, 재리뷰 필요"))
     if scope == "release":
         head = gitutil.head(change.project.root)
-        if (rec.get("bound") or {}).get("commit") != head:
-            res.block(err("APPROVAL_STALE", "release 승인 커밋 ≠ 현재 HEAD — 승인 무효"))
+        if not gitutil.same_code(change.project.root, (rec.get("bound") or {}).get("commit"), head):
+            res.block(err("APPROVAL_STALE", "release 승인 이후 제품 코드가 바뀜 (승인 커밋 → HEAD 에 .sdlc/ 밖 변경) — 승인 무효"))
     return vr.actor or rec.get("approver")
 
 
@@ -265,7 +265,8 @@ def gate(change, target: str) -> GateResult:
             res.block(blocker("DIRTY_WORKTREE", f"미커밋 변경 {len(dirty)}개 — 커밋 후 고정 SHA 로 QC: {dirty[:5]}"))
         checks = st.get("build_checks") or []
         last = checks[-1] if checks else None
-        if not last or last.get("commit_sha") != head or last.get("exit_code") != 0 or last.get("dirty"):
+        if (not last or not gitutil.same_code(change.project.root, last.get("commit_sha"), head)
+                or last.get("exit_code") != 0 or last.get("dirty")):
             res.block(blocker("NO_BUILD_CHECK", "현재 HEAD 의 Builder 자체 검사(exit 0) 기록 없음 — "
                                                 "`sdlc build check <id> -- <cmd>` (G4)"))
         d_issues, _ = drift.check(change, rep.parsed.get("plan"))
