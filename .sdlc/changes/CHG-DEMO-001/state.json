@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "change_id": "CHG-DEMO-001",
   "title": "행사 신청 및 대기자 자동 관리",
-  "stage": "REVIEW_PENDING",
+  "stage": "RELEASE_APPROVED",
   "risk_level": "standard",
   "risk_hits": [],
   "source_refs": [
@@ -70,13 +70,13 @@
     "release": {
       "scope": "release",
       "kind": "github_review",
-      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650781399",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650844263",
       "bound": {
-        "commit": "42ee980dadfcae108c4942db13051eed8957b94e",
-        "qc_run": "RUN-003"
+        "commit": "aa5d7ca7580e7b1aa85233a2955ecff8ac9cf51e",
+        "qc_run": "RUN-004"
       },
       "paths": {},
-      "at": "2026-10-26T10:43:24Z",
+      "at": "2026-10-26T10:49:13Z",
       "approver": "vibelabs-sdlc-gatekeeper[bot]"
     }
   },
@@ -454,7 +454,23 @@
       "from": "QC_PASSED",
       "to": "REVIEW_PENDING",
       "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:49:15Z",
+      "event": "approval",
+      "scope": "release",
+      "kind": "github_review",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650844263",
+      "approver": "vibelabs-sdlc-gatekeeper[bot]",
+      "auto": true
+    },
+    {
+      "at": "2026-10-26T10:50:09Z",
+      "event": "transition",
+      "from": "REVIEW_PENDING",
+      "to": "RELEASE_APPROVED",
+      "decision": "ALLOW"
     }
   ],
-  "updated_at": "2026-10-26T10:48:21Z"
+  "updated_at": "2026-10-26T10:50:09Z"
 }
