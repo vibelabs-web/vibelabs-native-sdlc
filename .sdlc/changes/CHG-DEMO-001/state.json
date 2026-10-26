@@ -2,26 +2,121 @@
   "schema_version": "1.0",
   "change_id": "CHG-DEMO-001",
   "title": "행사 신청 및 대기자 자동 관리",
-  "stage": "INTENT_DRAFT",
+  "stage": "REVIEW_PENDING",
   "risk_level": "standard",
   "risk_hits": [],
   "source_refs": [
     "examples/event-registration"
   ],
   "created_at": "2026-10-26T10:29:52Z",
-  "baselines": {},
-  "approvals": {},
-  "qc_lock": {},
-  "build_base_sha": null,
-  "build_checks": [],
-  "last_verification_run": null,
+  "baselines": {
+    "intent": "04d0cc5a2d0c1f903367d50a7af57607c51d25b9",
+    "spec": "f844ac143c96e55842a3e7ec6d52fe798b8ef786",
+    "plan": "cb9e83797c1781380dce73ca5f431e5801eafb1e",
+    "test_spec": "cb3c0c0b56921cdb31730997310ce731adeed077",
+    "qc_manifest": "c94414f5179899e61003c1f8d4018f6780c5c814",
+    "qc_tests": "86971b9ea15f4df53380c41a5acadadb15bb6213a58953c6949d0b529d936277"
+  },
+  "approvals": {
+    "intent": {
+      "scope": "intent",
+      "kind": "github_review",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650627301",
+      "bound": {
+        "intent": "04d0cc5a2d0c1f903367d50a7af57607c51d25b9"
+      },
+      "paths": {
+        "intent": ".sdlc/changes/CHG-DEMO-001/intent.md"
+      },
+      "at": "2026-10-26T10:30:09Z",
+      "approver": "vibelabs-sdlc-gatekeeper[bot]"
+    },
+    "spec": {
+      "scope": "spec",
+      "kind": "github_review",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650629485",
+      "bound": {
+        "intent": "04d0cc5a2d0c1f903367d50a7af57607c51d25b9",
+        "spec": "f844ac143c96e55842a3e7ec6d52fe798b8ef786"
+      },
+      "paths": {
+        "intent": ".sdlc/changes/CHG-DEMO-001/intent.md",
+        "spec": ".sdlc/changes/CHG-DEMO-001/spec.md"
+      },
+      "at": "2026-10-26T10:30:18Z",
+      "approver": "vibelabs-sdlc-gatekeeper[bot]"
+    },
+    "plan_test": {
+      "scope": "plan_test",
+      "kind": "github_review",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650633429",
+      "bound": {
+        "spec": "f844ac143c96e55842a3e7ec6d52fe798b8ef786",
+        "plan": "cb9e83797c1781380dce73ca5f431e5801eafb1e",
+        "test_spec": "cb3c0c0b56921cdb31730997310ce731adeed077",
+        "qc_manifest": "c94414f5179899e61003c1f8d4018f6780c5c814",
+        "qc_tests": "86971b9ea15f4df53380c41a5acadadb15bb6213a58953c6949d0b529d936277"
+      },
+      "paths": {
+        "spec": ".sdlc/changes/CHG-DEMO-001/spec.md",
+        "plan": ".sdlc/changes/CHG-DEMO-001/plan.md",
+        "test_spec": ".sdlc/changes/CHG-DEMO-001/test-spec.md",
+        "qc_manifest": ".sdlc/changes/CHG-DEMO-001/qc-manifest.json",
+        "qc_tests": ".sdlc/changes/CHG-DEMO-001/qc-tests"
+      },
+      "at": "2026-10-26T10:30:35Z",
+      "approver": "vibelabs-sdlc-gatekeeper[bot]"
+    }
+  },
+  "qc_lock": {
+    "locked_at": "2026-10-26T10:30:46Z",
+    "files": {
+      "test-spec.md": "cb3c0c0b56921cdb31730997310ce731adeed077",
+      "qc-manifest.json": "c94414f5179899e61003c1f8d4018f6780c5c814",
+      "qc-tests/test_registration_qc.py": "999e3c3199aee7dca52db6cc38ac9e5b12471c44"
+    }
+  },
+  "build_base_sha": "2c2a4563b90fa60ff437705ef6f859316306b7ec",
+  "build_checks": [
+    {
+      "at": "2026-10-26T10:30:53Z",
+      "cmd": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "app"
+      ],
+      "exit_code": 0,
+      "commit_sha": "2c2a4563b90fa60ff437705ef6f859316306b7ec",
+      "dirty": false,
+      "log_path": "build/BUILD-001.log",
+      "log_sha256": "a6707d4eff38012da33ddc34bc6dc076a3b17151cfc9aef223c8790cbe64c3da"
+    }
+  ],
+  "last_verification_run": "RUN-001",
   "retry_budget": {
     "per_defect": 3
   },
   "blocked_reasons": [],
-  "known_ids": [],
+  "known_ids": [
+    "REQ-001",
+    "REQ-002",
+    "REQ-003",
+    "TASK-001",
+    "TASK-002",
+    "TASK-003",
+    "TC-001",
+    "TC-002",
+    "TC-003",
+    "TC-004"
+  ],
   "retired_ids": [],
-  "counters": {},
+  "counters": {
+    "build": 1,
+    "run": 1
+  },
   "history": [
     {
       "at": "2026-10-26T10:29:52Z",
@@ -34,7 +129,109 @@
       "at": "2026-10-26T10:29:52Z",
       "event": "demo_init",
       "source": "examples/event-registration"
+    },
+    {
+      "at": "2026-10-26T10:30:11Z",
+      "event": "approval",
+      "scope": "intent",
+      "kind": "github_review",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650627301",
+      "approver": "vibelabs-sdlc-gatekeeper[bot]",
+      "auto": true
+    },
+    {
+      "at": "2026-10-26T10:30:13Z",
+      "event": "transition",
+      "from": "INTENT_DRAFT",
+      "to": "INTENT_APPROVED",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:30:14Z",
+      "event": "transition",
+      "from": "INTENT_APPROVED",
+      "to": "SPEC_DRAFT",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:30:20Z",
+      "event": "approval",
+      "scope": "spec",
+      "kind": "github_review",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650629485",
+      "approver": "vibelabs-sdlc-gatekeeper[bot]",
+      "auto": true
+    },
+    {
+      "at": "2026-10-26T10:30:24Z",
+      "event": "transition",
+      "from": "SPEC_DRAFT",
+      "to": "SPEC_APPROVED",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:30:28Z",
+      "event": "transition",
+      "from": "SPEC_APPROVED",
+      "to": "PLAN_TEST_DRAFT",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:30:38Z",
+      "event": "approval",
+      "scope": "plan_test",
+      "kind": "github_review",
+      "ref": "https://github.com/vibelabs-web/vibelabs-native-sdlc/pull/4#pullrequestreview-5650633429",
+      "approver": "vibelabs-sdlc-gatekeeper[bot]",
+      "auto": true
+    },
+    {
+      "at": "2026-10-26T10:30:46Z",
+      "event": "transition",
+      "from": "PLAN_TEST_DRAFT",
+      "to": "BASELINE_APPROVED",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:30:53Z",
+      "event": "transition",
+      "from": "BASELINE_APPROVED",
+      "to": "BUILDING",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:31:01Z",
+      "event": "transition",
+      "from": "BUILDING",
+      "to": "QC_RUNNING",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:31:17Z",
+      "event": "qc_run",
+      "run": "RUN-001",
+      "commit": "2c2a4563b90fa60ff437705ef6f859316306b7ec",
+      "results": {
+        "TC-001": "PASS",
+        "TC-002": "PASS",
+        "TC-003": "PASS",
+        "TC-004": "PASS"
+      }
+    },
+    {
+      "at": "2026-10-26T10:31:24Z",
+      "event": "transition",
+      "from": "QC_RUNNING",
+      "to": "QC_PASSED",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:31:32Z",
+      "event": "transition",
+      "from": "QC_PASSED",
+      "to": "REVIEW_PENDING",
+      "decision": "ALLOW"
     }
   ],
-  "updated_at": "2026-10-26T10:29:52Z"
+  "updated_at": "2026-10-26T10:31:32Z"
 }
