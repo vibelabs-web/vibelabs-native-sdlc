@@ -37,3 +37,4 @@
 | D33 | 게이트의 CI 확인은 같은 커밋·같은 이름의 체크 중 가장 최근 실행만 본다 | — | 봇 리뷰 이벤트로 재실행된 성공이 이전 실패에 가려지는 문제 |
 | D34 | 계획 드리프트는 빌드 시작 이후 **이 브랜치가 직접 만든 비머지 커밋**(origin 기본 브랜치에 없는 것)이 바꾼 파일만 본다 | — | PR #4 e2e 에서 발견: main 을 합친 뒤 main 쪽 파일이 계획 밖 변경으로 잡혀 QC_RUNNING 이 막힘. 브랜치 안에서 만들었다 되돌린 파일은 보수적으로 계속 센다 |
 | D35 | "같은 코드" 판정: 증거·빌드 검사·release 승인의 커밋이 HEAD 의 조상이고 그 사이 변경이 `.sdlc/` 뿐이면 동일 커밋으로 본다 | §7 `evidence.commit_sha == current_commit_sha` | PR #4 e2e 에서 발견: 자율 모드는 상태·증거를 커밋해 PR 에 올려야 하는데, 그 커밋이 증거를 무효로 만들어 끝나지 않음. `.sdlc/` 무결성은 기준선·잠금·report 해시가 담당 |
+| D36 | CI 의 base 브랜치는 `github.event.pull_request.base.ref` 로 받는다 | — | PR #4 e2e 에서 발견: 봇 리뷰가 일으킨 `pull_request_review` 실행에서 `github.base_ref` 가 비어 QC 자산 검사가 깨짐 → 최신 체크 실패로 릴리스 BLOCK |

@@ -55,14 +55,26 @@ class CheckQcAssetsTest(unittest.TestCase):
         p.write_text(text)
         return self.commit("qc asset")
 
-    def run_check(self, labels=()):
+    def run_check(self, labels=(), base="main"):
         gh = self.bin / "gh"
         gh.write_text(f"#!/bin/sh\ncat <<'JSON'\n{json.dumps(self.reviews)}\nJSON\n")
         gh.chmod(0o755)
         sh(self.repo, "git", "fetch", "-q", "origin")
-        env = {**os.environ, "PATH": f"{self.bin}:{os.environ['PATH']}", "BASE_REF": "main", "PR_NUMBER": "1",
+        env = {**os.environ, "PATH": f"{self.bin}:{os.environ['PATH']}", "BASE_REF": base, "PR_NUMBER": "1",
                "REPO": "acme/app", "LABELS": json.dumps(list(labels)), "GH_TOKEN": "x"}
         return subprocess.run([sys.executable, str(SCRIPT)], cwd=self.repo, capture_output=True, text=True, env=env)
+
+    def test_empty_base_ref_is_explicit_error(self):
+        """회귀: pull_request_review 이벤트에서 github.base_ref 가 비어 `origin/...HEAD` 로 깨지던 문제."""
+        self.add_qc_asset()
+        r = self.run_check(base="")
+        self.assertEqual(r.returncode, 2)
+        self.assertIn("BASE_REF", r.stdout)
+
+    def test_workflow_uses_event_base_ref(self):
+        wf = (HARNESS / ".github" / "workflows" / "sdlc-validate.yml").read_text()
+        self.assertIn("github.event.pull_request.base.ref", wf)
+        self.assertNotIn("BASE_REF: ${{ github.base_ref }}", wf)
 
     def test_no_qc_change_passes(self):
         (self.repo / "app.py").write_text("x=1\n")

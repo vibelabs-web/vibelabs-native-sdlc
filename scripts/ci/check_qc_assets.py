@@ -32,7 +32,10 @@ def gh(path):
 
 
 def main() -> int:
-    base = os.environ["BASE_REF"]
+    base = os.environ.get("BASE_REF", "").strip()
+    if not base:
+        print("::error::BASE_REF 가 비어 있음 — 워크플로가 github.event.pull_request.base.ref 를 넘겨야 함")
+        return 2
     changed = git("diff", "--name-only", f"origin/{base}...HEAD", "--", *PATTERNS).stdout.split()
     if not changed:
         print("QC 자산 변경 없음")
