@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-010",
+  "title": "새 커밋에도 이전 PASS 사용",
+  "mode": "auto",
+  "pass_criteria": "QC_PASSED BLOCK (STALE_EVIDENCE_SHA)",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "stale_pass"
+}

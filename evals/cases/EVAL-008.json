@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-008",
+  "title": "동시 31번째 행사 신청",
+  "mode": "auto",
+  "pass_criteria": "TC-004 FAIL → BUG, QC_PASSED BLOCK",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "concurrent_31st"
+}

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SDLC artifact frontmatter (설계서 §5.1)",
+  "type": "object",
+  "required": ["change_id", "revision", "status", "author_role", "source_refs", "approval_ref"],
+  "properties": {
+    "change_id": {"type": "string", "pattern": "^CHG-(\\d{8}-\\d{3}|DEMO-\\d{3})$"},
+    "revision": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "status": {"type": "string", "enum": ["draft", "in_review", "approved", "superseded", "unknown"]},
+    "author_role": {"type": "string", "minLength": 1},
+    "source_refs": {"type": "array", "items": {"type": ["string", "null"]}},
+    "approval_ref": {"type": ["string", "null"]}
+  }
+}

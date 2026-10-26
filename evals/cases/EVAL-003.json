@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-003",
+  "title": "존재하지 않는 요구 ID",
+  "mode": "auto",
+  "pass_criteria": "게이트 FAIL (UNKNOWN_REF)",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "unknown_req"
+}

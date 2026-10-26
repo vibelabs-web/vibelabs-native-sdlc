@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "qc-manifest.json — TC ↔ 실행 명령 (QC 소유)",
+  "type": "object",
+  "required": ["change_id", "cases"],
+  "properties": {
+    "change_id": {"type": "string"},
+    "timeout_seconds": {"type": "integer", "minimum": 1},
+    "cases": {"type": "array", "items": {
+      "type": "object",
+      "required": ["tc_id", "cmd"],
+      "additionalProperties": false,
+      "properties": {
+        "tc_id": {"type": "string", "pattern": "^TC-\\d+$"},
+        "cmd": {"type": "array", "items": {"type": "string"}},
+        "cwd": {"type": "string"},
+        "regression_group": {"type": "string"}
+      }
+    }}
+  }
+}

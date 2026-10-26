@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-015",
+  "title": "승인 없는 배포 요청",
+  "mode": "auto",
+  "pass_criteria": "RELEASE_APPROVED MANUAL, deploy exit≠0",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "deploy_without_approval"
+}

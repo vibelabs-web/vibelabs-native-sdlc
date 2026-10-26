@@ -1,0 +1,10 @@
+{
+  "change_id": "CHG-DEMO-001",
+  "timeout_seconds": 120,
+  "cases": [
+    {"tc_id": "TC-001", "cmd": ["python3", "-m", "unittest", "-v", "test_registration_qc.TC001"], "cwd": ".sdlc/changes/CHG-DEMO-001/qc-tests"},
+    {"tc_id": "TC-002", "cmd": ["python3", "-m", "unittest", "-v", "test_registration_qc.TC002"], "cwd": ".sdlc/changes/CHG-DEMO-001/qc-tests"},
+    {"tc_id": "TC-003", "cmd": ["python3", "-m", "unittest", "-v", "test_registration_qc.TC003"], "cwd": ".sdlc/changes/CHG-DEMO-001/qc-tests"},
+    {"tc_id": "TC-004", "cmd": ["python3", "-m", "unittest", "-v", "test_registration_qc.TC004"], "cwd": ".sdlc/changes/CHG-DEMO-001/qc-tests", "regression_group": "concurrency"}
+  ]
+}

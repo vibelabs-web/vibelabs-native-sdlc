@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "BUG-NNN.md frontmatter (SOP §4 단계 5)",
+  "type": "object",
+  "required": ["bug_id", "change_id", "status", "severity", "classification", "requirement_ids", "test_ids", "fix_attempts", "first_failed_sha", "last_failed_sha"],
+  "properties": {
+    "bug_id": {"type": "string", "pattern": "^BUG-\\d{3,}$"},
+    "change_id": {"type": "string"},
+    "status": {"type": "string", "enum": ["open", "triaged", "in_progress", "ready_for_retest", "verified_fixed", "closed", "reopened", "blocked_spec", "escalated"]},
+    "severity": {"type": "string", "enum": ["critical", "high", "medium", "low"]},
+    "classification": {"type": "string", "enum": ["defect", "flaky", "infra", "oracle"]},
+    "requirement_ids": {"type": "array", "items": {"type": "string"}},
+    "test_ids": {"type": "array", "items": {"type": "string"}},
+    "fix_attempts": {"type": "integer", "minimum": 0},
+    "first_failed_sha": {"type": ["string", "null"]},
+    "last_failed_sha": {"type": ["string", "null"]},
+    "verified_run": {"type": ["string", "null"]}
+  }
+}

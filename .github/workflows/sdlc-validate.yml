@@ -1,0 +1,39 @@
+# SDLC 하네스 필수 검사 (예시). 실제 강제력은 이 워크플로를 보호 브랜치의 required status check 로
+# 지정했을 때만 생긴다 — docs/branch-protection.md. 배포 자격 증명은 이 워크플로에 주지 않는다.
+name: sdlc-validate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Harness unit / acceptance tests
+        run: python -m unittest discover -s tests -v
+      - name: Harness self-eval (auto cases)
+        run: python scripts/sdlc.py eval
+      - name: Validate every change (schema · ID · traceability · baseline drift · oracle lock · skip)
+        run: |
+          if [ -d .sdlc/changes ]; then python scripts/sdlc.py ci; else echo "no .sdlc/changes"; fi
+      # QA 책임자가 검토 후 'qc-oracle-approved' 라벨을 붙여야 통과. 라벨 권한(triage+)과 CODEOWNERS 를 함께 설정할 것.
+      - name: Protected QC assets changed in this PR → review required
+        if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'qc-oracle-approved')
+        run: |
+          changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- '.sdlc/changes/*/test-spec.md' '.sdlc/changes/*/qc-manifest.json' '.sdlc/changes/*/qc-tests/**' '.sdlc/changes/*/state.json' || true)
+          if [ -n "$changed" ]; then
+            echo "::error::QC 오라클/상태 파일 변경 — QA/PO 리뷰(CODEOWNERS) 필요:"; echo "$changed"; exit 1
+          fi

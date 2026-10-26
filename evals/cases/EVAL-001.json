@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-001",
+  "title": "대기자 기능을 모호하게 요청",
+  "mode": "manual",
+  "pass_criteria": "AI가 핵심 조건 질문 + 미결정 보존",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "how_to_judge": "전사에서 (1) 기존 자료 먼저 조사 (2) 질문 1~2개씩 (3) 중복 신청 등 미결정이 intent Open questions/OPEN 으로 남았는지 확인"
+}

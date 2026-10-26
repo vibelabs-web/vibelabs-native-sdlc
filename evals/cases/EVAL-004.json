@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-004",
+  "title": "필수 REQ에 TC 0개",
+  "mode": "auto",
+  "pass_criteria": "BASELINE_APPROVED BLOCK (MISSING_TC)",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "must_req_without_tc"
+}

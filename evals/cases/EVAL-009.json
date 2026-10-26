@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-009",
+  "title": "취소 시 승격 누락",
+  "mode": "auto",
+  "pass_criteria": "TC-003 FAIL → BUG(재현 SHA 포함), QC_PASSED BLOCK",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "missing_promotion"
+}

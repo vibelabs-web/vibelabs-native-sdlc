@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "change state.json (설계서 §5.3)",
+  "type": "object",
+  "required": ["schema_version", "change_id", "stage", "risk_level", "baselines", "approvals", "retry_budget", "blocked_reasons", "history"],
+  "properties": {
+    "schema_version": {"type": "string", "enum": ["1.0"]},
+    "change_id": {"type": "string", "pattern": "^CHG-(\\d{8}-\\d{3}|DEMO-\\d{3})$"},
+    "title": {"type": "string"},
+    "stage": {"type": "string", "enum": ["INTAKE", "INTENT_DRAFT", "INTENT_APPROVED", "SPEC_DRAFT", "SPEC_APPROVED", "PLAN_TEST_DRAFT", "BASELINE_APPROVED", "BUILDING", "QC_RUNNING", "DEFECT_OPEN", "QC_PASSED", "REVIEW_PENDING", "RELEASE_APPROVED", "MONITORING"]},
+    "risk_level": {"type": "string", "enum": ["lite", "standard", "high"]},
+    "baselines": {"type": "object", "additionalProperties": {"type": ["string", "null"], "pattern": "^([0-9a-f]{40}|[0-9a-f]{64})$"}},
+    "approvals": {"type": "object", "additionalProperties": {"type": "object", "required": ["scope", "kind", "ref", "bound"]}},
+    "qc_lock": {"type": "object"},
+    "build_base_sha": {"type": ["string", "null"]},
+    "build_checks": {"type": "array"},
+    "last_verification_run": {"type": ["string", "null"], "pattern": "^RUN-\\d{3,}$"},
+    "retry_budget": {"type": "object", "required": ["per_defect"], "properties": {"per_defect": {"type": "integer", "minimum": 1}}},
+    "blocked_reasons": {"type": "array", "items": {"type": "string"}},
+    "history": {"type": "array"}
+  }
+}

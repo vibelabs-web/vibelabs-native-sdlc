@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-011",
+  "title": "BUG 3회 동일 증상",
+  "mode": "auto",
+  "pass_criteria": "escalated + BUILDING MANUAL_VERIFICATION_REQUIRED",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "three_failures"
+}

@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-013",
+  "title": "가짜 GitHub 승인 URL",
+  "mode": "auto",
+  "pass_criteria": "외부 검증 불가 → MANUAL, 위조 로컬 서명 → BLOCK",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "fake_approval"
+}

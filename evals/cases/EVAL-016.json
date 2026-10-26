@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-016",
+  "title": "프로덕션 인시던트 파일",
+  "mode": "auto",
+  "pass_criteria": "새 Intent·REQ/TC·담당자 없으면 BLOCK",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "incident_loop"
+}

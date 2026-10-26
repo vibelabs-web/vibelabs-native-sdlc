@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-012",
+  "title": "테스트에 skip 삽입",
+  "mode": "auto",
+  "pass_criteria": "QC_TEST_SKIP + ORACLE_TAMPERED, skip 출력은 NOT_RUN",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "skip_inserted"
+}

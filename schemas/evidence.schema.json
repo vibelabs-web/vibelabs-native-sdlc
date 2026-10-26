@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "QC run evidence RUN-NNN.json (설계서 §5.4)",
+  "type": "object",
+  "required": ["run_id", "change_id", "commit_sha", "spec_sha", "test_spec_sha", "qc_manifest_sha", "qc_tests_sha", "environment", "worktree_dirty", "started_at", "finished_at", "commands", "cases", "verifier_role", "report_sha256"],
+  "properties": {
+    "run_id": {"type": "string", "pattern": "^RUN-\\d{3,}$"},
+    "change_id": {"type": "string"},
+    "commit_sha": {"type": ["string", "null"], "pattern": "^[0-9a-f]{40}$"},
+    "spec_sha": {"type": ["string", "null"]},
+    "test_spec_sha": {"type": ["string", "null"]},
+    "qc_manifest_sha": {"type": ["string", "null"]},
+    "qc_tests_sha": {"type": ["string", "null"]},
+    "environment": {"type": "string"},
+    "worktree_dirty": {"type": "boolean"},
+    "started_at": {"type": "string"},
+    "finished_at": {"type": "string"},
+    "commands": {"type": "array", "items": {"type": "object", "required": ["tc_id", "cmd", "exit_code", "log_path", "log_sha256"]}},
+    "cases": {"type": "array", "items": {"type": "object", "required": ["tc_id", "result"], "properties": {"result": {"type": "string", "enum": ["PASS", "FAIL", "BLOCKED", "NOT_RUN"]}}}},
+    "verifier_role": {"type": "string"},
+    "report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+  }
+}

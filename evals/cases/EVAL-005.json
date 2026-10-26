@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-005",
+  "title": "완료된 Plan과 실제 변경 불일치",
+  "mode": "auto",
+  "pass_criteria": "QC_RUNNING BLOCK (PLAN_DRIFT)",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "scenario": "plan_drift"
+}
