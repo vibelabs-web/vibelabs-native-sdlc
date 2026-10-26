@@ -125,9 +125,25 @@
       "dirty": false,
       "log_path": "build/BUILD-003.log",
       "log_sha256": "a6707d4eff38012da33ddc34bc6dc076a3b17151cfc9aef223c8790cbe64c3da"
+    },
+    {
+      "at": "2026-10-26T10:41:57Z",
+      "cmd": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "app"
+      ],
+      "exit_code": 0,
+      "commit_sha": "d3ccaba4c47d754bd5cec2e4684dcefb680f92c0",
+      "dirty": false,
+      "log_path": "build/BUILD-004.log",
+      "log_sha256": "a6707d4eff38012da33ddc34bc6dc076a3b17151cfc9aef223c8790cbe64c3da"
     }
   ],
-  "last_verification_run": "RUN-002",
+  "last_verification_run": "RUN-003",
   "retry_budget": {
     "per_defect": 3
   },
@@ -146,8 +162,8 @@
   ],
   "retired_ids": [],
   "counters": {
-    "build": 3,
-    "run": 2
+    "build": 4,
+    "run": 3
   },
   "history": [
     {
@@ -309,7 +325,47 @@
       "from": "QC_PASSED",
       "to": "REVIEW_PENDING",
       "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:41:57Z",
+      "event": "transition",
+      "from": "REVIEW_PENDING",
+      "to": "BUILDING",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:42:04Z",
+      "event": "transition",
+      "from": "BUILDING",
+      "to": "QC_RUNNING",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:42:05Z",
+      "event": "qc_run",
+      "run": "RUN-003",
+      "commit": "d3ccaba4c47d754bd5cec2e4684dcefb680f92c0",
+      "results": {
+        "TC-001": "PASS",
+        "TC-002": "PASS",
+        "TC-003": "PASS",
+        "TC-004": "PASS"
+      }
+    },
+    {
+      "at": "2026-10-26T10:42:12Z",
+      "event": "transition",
+      "from": "QC_RUNNING",
+      "to": "QC_PASSED",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:42:20Z",
+      "event": "transition",
+      "from": "QC_PASSED",
+      "to": "REVIEW_PENDING",
+      "decision": "ALLOW"
     }
   ],
-  "updated_at": "2026-10-26T10:39:14Z"
+  "updated_at": "2026-10-26T10:42:20Z"
 }
