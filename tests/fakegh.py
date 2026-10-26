@@ -24,8 +24,29 @@ class FakeGh(github.GhClient):
         self.routes[f"{b}/collaborators/{reviewer}/permission"] = {"permission": perm}
         return f"https://github.com/{self.repo}/pull/{pr}#pullrequestreview-{rid}"
 
+    def open_pr(self, pr=7, author="vibelabs-web"):
+        """PR head 는 호출 시점의 로컬 HEAD (push 되어 있다고 가정)."""
+        import subprocess
+        def pull():
+            head = subprocess.run(["git", "-C", str(self.root), "rev-parse", "HEAD"],
+                                  capture_output=True, text=True).stdout.strip()
+            return {"state": "open", "user": {"login": author}, "head": {"sha": head}}
+        self.routes[f"repos/{self.repo}/pulls/{pr}"] = pull
+
     def api(self, path, method="GET", body=None):
         self.calls.append((method, path, body))
+        m = re.match(rf"repos/{re.escape(self.repo)}/pulls/(\d+)/reviews$", path)
+        if m and method == "POST":
+            pr = int(m.group(1))
+            rid = 7000 + len([c for c in self.calls if c[0] == "POST" and c[1].endswith("/reviews")])
+            login = getattr(self, "bot_login", "gk[bot]")
+            self.routes[f"repos/{self.repo}/pulls/{pr}/reviews/{rid}"] = {
+                "state": "APPROVED" if body["event"] == "APPROVE" else body["event"],
+                "user": {"login": login, "type": "Bot"}, "commit_id": body["commit_id"],
+                "submitted_at": "2026-10-26T02:00:00Z", "body": body.get("body")}
+            return {"id": rid, "html_url": f"https://github.com/{self.repo}/pull/{pr}#pullrequestreview-{rid}"}
+        if callable(self.routes.get(path)):
+            return self.routes[path]()
         if path in self.routes:
             r = self.routes[path]
             if isinstance(r, Exception):

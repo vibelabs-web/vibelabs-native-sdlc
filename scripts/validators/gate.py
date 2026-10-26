@@ -142,7 +142,7 @@ def _verify_security(change, res: GateResult, primary: str | None) -> None:
         res.manual.append(f"security: high-risk 변경은 {policy.POLICY_REL} 에 security 승인자 명단이 필요")
         return
     actor = _verify_approval(change, "security", res)
-    if actor and primary and actor.lower() == primary.lower():
+    if actor and primary and actor.lower() == primary.lower() and policy.distinct_security_reviewer(change.project.root):
         res.block(err("SECURITY_SAME_REVIEWER", f"security 승인자 {actor} 가 plan_test 승인자와 같음 — 독립 승인 필요"))
 
 
