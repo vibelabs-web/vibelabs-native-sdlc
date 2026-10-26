@@ -170,3 +170,32 @@ class InvalidationTest(SandboxCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class DriftUpstreamMergeTest(SandboxCase):
+    """회귀: main 을 합쳐 들어온 파일을 계획 밖 변경으로 세지 않는다 (PR #4 e2e 에서 발견)."""
+
+    def test_merged_upstream_files_not_counted(self):
+        remote = self.sb.base / "remote.git"
+        fx.git(self.sb.base, "init", "-q", "--bare", "-b", "main", str(remote))
+        fx.git(self.sb.root, "remote", "add", "origin", str(remote))
+        fx.git(self.sb.root, "branch", "-M", "main")
+        ch = self.sb.demo()
+        fx.git(self.sb.root, "push", "-q", "origin", "main")
+        fx.git(self.sb.root, "remote", "set-head", "origin", "main")
+        fx.git(self.sb.root, "checkout", "-q", "-b", "feature")
+        ch, _ = fx.advance(self.sb, ch, until="BUILDING")
+        fx.git(self.sb.root, "checkout", "-q", "main")
+        (self.sb.root / "docs").mkdir()
+        (self.sb.root / "docs" / "upstream.md").write_text("main 쪽 변경\n")
+        self.sb.commit("upstream change")
+        fx.git(self.sb.root, "push", "-q", "origin", "main")
+        fx.git(self.sb.root, "checkout", "-q", "feature")
+        fx.git(self.sb.root, "merge", "-q", "--no-edit", "origin/main")
+        from validators import drift
+        issues, out = drift.check(self.sb.reload(ch), check.validate(self.sb.reload(ch)).parsed["plan"])
+        self.assertEqual(out, [], issues)
+        (self.sb.root / "app" / "extra.py").write_text("# 브랜치가 직접 만든 계획 밖 파일\n")
+        self.sb.commit("out of plan on branch")
+        issues, out = drift.check(self.sb.reload(ch), check.validate(self.sb.reload(ch)).parsed["plan"])
+        self.assertEqual(out, ["app/extra.py"])
