@@ -15,7 +15,7 @@ Claude Code 세션에서:
 ```
 
 셸에서는 `claude plugin marketplace add vibelabs-web/vibelabs-native-sdlc` → `claude plugin install vibelabs-sdlc@vibelabs-sdlc` (`--scope project` 로 프로젝트에만).
-업데이트: `/plugin marketplace update vibelabs-sdlc`. 설치 후 진입은 `/vibelabs-sdlc:sdlc`, 에이전트 이름은 `vibelabs-sdlc:sdlc-builder` 처럼 접두사가 붙는다.
+업데이트: `/plugin marketplace update vibelabs-sdlc`. 사용자에게 업데이트는 `.claude-plugin/plugin.json` 의 version 이 올라갈 때만 간다 — 배포 파일(skills·agents·scripts·schemas·templates·hooks·.claude-plugin)을 바꾼 PR 은 CI(`scripts/ci/check_plugin_version.py`)가 version 상승을 요구한다. 설치 후 진입은 `/vibelabs-sdlc:sdlc`, 에이전트 이름은 `vibelabs-sdlc:sdlc-builder` 처럼 접두사가 붙는다.
 
 - 지원: Claude Code CLI·데스크톱·IDE. **claude.ai/code 클라우드 세션은 로컬에서 설치한 플러그인을 로드하지 않는다**(조직 managed settings 배포만 예외). claude.ai 채팅에 zip 업로드는 스킬만 로드하고 에이전트를 무시하며 git·python 실행 환경이 없어 **미지원**.
 

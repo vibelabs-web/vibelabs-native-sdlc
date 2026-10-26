@@ -43,3 +43,9 @@ jobs:
           LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
           GH_TOKEN: ${{ github.token }}
         run: python scripts/ci/check_qc_assets.py
+      # 스킬·에이전트·CLI 를 바꾼 PR 은 플러그인 version 을 올려야 설치한 사람에게 업데이트가 간다
+      - name: Plugin version bumped when shipped files change
+        if: startsWith(github.event_name, 'pull_request')
+        env:
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        run: python scripts/ci/check_plugin_version.py

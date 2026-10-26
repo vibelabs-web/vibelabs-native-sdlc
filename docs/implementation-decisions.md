@@ -39,3 +39,6 @@
 | D35 | "같은 코드" 판정: 증거·빌드 검사·release 승인의 커밋이 HEAD 의 조상이고 그 사이 변경이 `.sdlc/` 뿐이면 동일 커밋으로 본다 | §7 `evidence.commit_sha == current_commit_sha` | PR #4 e2e 에서 발견: 자율 모드는 상태·증거를 커밋해 PR 에 올려야 하는데, 그 커밋이 증거를 무효로 만들어 끝나지 않음. `.sdlc/` 무결성은 기준선·잠금·report 해시가 담당 |
 | D36 | CI 의 base 브랜치는 `github.event.pull_request.base.ref` 로 받는다 | — | PR #4 e2e 에서 발견: 봇 리뷰가 일으킨 `pull_request_review` 실행에서 `github.base_ref` 가 비어 QC 자산 검사가 깨짐 → 최신 체크 실패로 릴리스 BLOCK |
 | D37 | Claude Code 플러그인으로 배포: 레포 루트가 플러그인이자 마켓플레이스(`.claude-plugin/`, `source: "./"`). 진입 스킬은 `skills/sdlc/SKILL.md` 로 이동 | 설계서 §2 `skills/sdlc/SKILL.md` (원래 설계와 일치하게 됨) | 다른 사람이 `/plugin install` 로 설치. 스킬은 `${CLAUDE_SKILL_DIR}/../..` 로 CLI 를 찾아 플러그인 캐시·심링크 설치 모두에서 동작(심링크 모드 치환은 실측 확인). 플러그인 설치 시 이름에 `vibelabs-sdlc:` 접두사 |
+
+| D38 | MIT 라이선스. 배포 파일(skills·agents·scripts·schemas·templates·hooks·.claude-plugin)을 바꾼 PR 은 `plugin.json` version 상승을 CI 로 강제 | — | 플러그인은 version 이 바뀔 때만 사용자에게 업데이트된다. 문서·테스트만 바꾼 PR 은 면제 |
+| D39 | 공개 전환 후 `main` 보호: PR 필수·승인 0·필수 체크 `validate`(strict)·관리자 포함·force push 금지 | `branch-protection.md` §1 의 승인 1·코드오너 리뷰 | 1인 계정에서는 승인 1 이상이면 머지 불가. 승인 검증은 하네스 게이트가 담당 |
