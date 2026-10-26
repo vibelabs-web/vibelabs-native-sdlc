@@ -63,7 +63,7 @@ flowchart TD
 | Phase 3 QC 실행·RUN 증거·BUG 루프·재시도 예산·릴리스 체크리스트 | 구현·테스트 | `scripts/core/runner.py`, `bugs.py`, `release.py` |
 | Phase 4 오라클 잠금·skip 탐지·가드 훅·CI 예시·evals | 구현·테스트 (보호 브랜치·CODEOWNERS 적용은 **미적용**, 권장안만) | `scripts/validators/tamper.py`, `scripts/hooks/`, `.github/workflows/`, `evals/` |
 | M2 GitHub PR 리뷰 승인 검증(E2)·CI 체크·고위험 security 승인 | 구현·테스트 (가짜 API + 실제 레포 읽기 확인) | `scripts/validators/approvals.py`, `scripts/core/github.py`, `docs/github-integration.md` |
-| 완전 자율 승인: GitHub App 봇 + 규칙 기반 `auto-approve` | 구현·테스트 (실제 App 연결은 설정 후 확인) | `scripts/core/github_app.py`, `scripts/core/autoapprove.py`, `agents/sdlc-gatekeeper.md` |
+| 완전 자율 승인: GitHub App 봇 + 규칙 기반 `auto-approve` | 구현·테스트·**실제 GitHub e2e 통과** (PR #4: INTENT_DRAFT → RELEASE_APPROVED, 사람 승인 0) | `scripts/core/github_app.py`, `scripts/core/autoapprove.py`, `agents/sdlc-gatekeeper.md` |
 | M2 버그 소통: GitHub Issue 동기화·댓글·보드 | 구현·테스트 (실제 레포에서 Issue 생성·댓글 확인) | `scripts/core/bugtracker.py` |
 | 자동 배포·롤백 | 범위 밖 (명령 없음) | — |
 
