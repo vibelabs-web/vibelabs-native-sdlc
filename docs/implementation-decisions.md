@@ -29,3 +29,7 @@
 | D25 | E2 CI 증거 = 현재 HEAD check-run 의 `required_checks` 전부 success. RELEASE_APPROVED 항상, high-risk 는 QC_PASSED 에도 | §5.4 E2 | 로컬 RUN(E1)만으로 릴리스 금지 |
 | D26 | 버그 소통은 GitHub Issue 를 거울로, 원본은 BUG 파일. GitHub 쪽 수동 닫기·라벨 변경은 sync 때 되돌린다 | — | Issue 닫기로 결함이 "해결"되는 우회 차단 |
 | D27 | Issue 댓글은 BUG Discussion 에 인용(`> `)만, 하네스 자신의 댓글은 `<!-- sdlc-harness -->` 표식으로 구분해 되가져오지 않음 | — | prompt injection 방어, 중복 방지 |
+| D28 | **완전 자율 모드**: 고위험·릴리스 포함 모든 승인을 GitHub App 봇이 규칙 기반으로 수행 | SOP §1 "High-risk: 인적 승인을 대체하는 자동화 금지", §8 사람 호출 시점 | 작가님 결정 (2026-10-26) — 모든 작업·PR 을 AI 가 수행. 원본 SOP 는 수정하지 않고 이 표로 차이를 기록 |
+| D29 | 단일 계정에서 승인 독립성 = 별도 기계 신원(GitHub App) + 결정적 승인 규칙(`auto-approve`) | — | GitHub 는 PR 작성자의 자기 승인을 막음. "리뷰어 ≠ 작성자" 검사를 빼면 승인이 무의미해짐 |
+| D30 | 봇 리뷰는 정책 명단에 그 봇이 있는 스코프에서만 인정, 사람 리뷰는 기존대로 쓰기 권한 확인 | — | 임의 App 의 승인 차단 |
+| D31 | escalated·blocked_spec 해제는 자율 모드에서도 TTY 사람 결정으로 유지 | — | 재시도 예산 소진은 "자동으로 풀 수 없는 문제" 신호. 자율 루프의 무한 반복 방지 장치로 남김 |

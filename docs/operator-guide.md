@@ -10,6 +10,8 @@
 | `validate <id>\|--all [--strict] [--json]` | 스키마·ID·추적성·기준선 드리프트·오라클 잠금·skip·BUG 스키마 | 0/1 |
 | `approve <id> intent\|spec\|plan_test\|release` | **사람 전용 (TTY)** 로컬 승인 E1 | 0/2 |
 | `approve-github <id> <scope> --review <url>` | GitHub PR 리뷰를 승인 원본으로 등록 (E2, 매 게이트 재검증) | 0 VERIFIED / 1 INVALID / 3 확인 불가 |
+| `auto-approve <id> <scope> --pr N` | 완전 자율: 규칙 통과 시에만 봇이 PR 승인 | 0 승인 / 1 차단 / 3 판정 불가 |
+| `github-app setup\|status` | 승인 봇 생성(브라우저 1회)·설치·정책 확인 | 0/1 |
 | `gate <id> <STAGE> [--dry-run] [--json]` | 전이 판정, ALLOW 면 적용 | 0 ALLOW / 1 BLOCK / 3 MANUAL |
 | `reopen <id> --to INTENT_DRAFT\|SPEC_DRAFT\|PLAN_TEST_DRAFT --reason R` | 재기준화: 해당 승인·기준선·잠금 제거, 이전 RUN stale | 0/2 |
 | `build check <id> -- <cmd>` | Builder 자체 검사 기록 (QC_RUNNING 조건) | 명령 exit |

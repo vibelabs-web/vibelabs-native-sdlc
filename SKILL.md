@@ -33,6 +33,13 @@ sdlc() { python3 "$SDLC/scripts/sdlc.py" "$@"; }  # 대상 프로젝트 루트�
 
 **plan 과 test-spec 은 반드시 서로 다른 서브에이전트 호출로, 같은 승인 spec 만 입력으로 주고 병렬 실행한다.** 한쪽 결과를 다른 쪽 프롬프트에 넣지 않는다 (QC 가 잘못된 계획을 그대로 승인하는 자기참조 방지).
 
+## 1-1. 완전 자율 모드 (`.sdlc/policies/approvers.json` 의 `"mode": "autonomous"`)
+
+- 변경마다 브랜치 `sdlc/<CHG>` + PR 을 연다. 산출물은 커밋·push 한 뒤 승인받는다.
+- 승인 단계(intent·spec·plan_test[+security]·release)마다 **`sdlc-gatekeeper` 에이전트**를 호출해 `sdlc auto-approve <id> <scope> --pr N` 만 실행시킨다. 다른 에이전트는 승인을 만들지 않는다.
+- auto-approve 가 거부하면(exit 1/3) 사유를 담당 단계로 돌려보낸다. 사람에게 묻지 않는다 — 단, escalated 결함과 intent 의 차단 OPEN 질문은 예외로 멈추고 보고한다.
+- 상세: `docs/github-integration.md` §5.
+
 ## 2. 게이트 결정 다루기
 
 | 결정 | exit | 할 일 |
