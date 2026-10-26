@@ -74,6 +74,12 @@ flowchart TD
 /plugin install vibelabs-sdlc@vibelabs-sdlc
 ```
 
+또는 터미널에서 한 줄 (Node 18+ — 위 두 줄을 대신 실행하고, `claude` 가 없으면 `~/.claude` 에 복사 설치):
+
+```bash
+npx github:vibelabs-web/vibelabs-native-sdlc
+```
+
 설치 후 `/vibelabs-sdlc:sdlc` 로 시작한다. 요구 사항: Python 3.10+, git. 개발용 심링크 설치·CLI 는 아래.
 
 ```bash

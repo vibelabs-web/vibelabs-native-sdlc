@@ -78,6 +78,20 @@ class CheckPluginVersionTest(unittest.TestCase):
         self.commit()
         self.assertEqual(self.run_check().returncode, 1)
 
+    def test_package_json_version_must_match(self):
+        self.write("bin/x.js", "1\n")
+        self.set_version("0.3.1")
+        self.write("package.json", json.dumps({"name": "p", "version": "0.3.0"}))
+        self.commit()
+        r = self.run_check()
+        self.assertEqual(r.returncode, 1, r.stdout)
+        self.assertIn("같이 올려야 함", r.stdout)
+
+    def test_installer_change_needs_bump(self):
+        self.write("package.json", json.dumps({"name": "p", "version": "0.3.0"}))
+        self.commit()
+        self.assertEqual(self.run_check().returncode, 1)
+
     def test_empty_base_ref_is_usage_error(self):
         env = {**os.environ, "BASE_REF": ""}
         r = subprocess.run([sys.executable, str(SCRIPT)], cwd=self.repo, env=env, capture_output=True, text=True)
