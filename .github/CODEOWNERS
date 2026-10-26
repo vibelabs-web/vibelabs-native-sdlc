@@ -1,0 +1,9 @@
+# 무료 플랜 비공개 레포라 브랜치 보호가 꺼져 있어 강제되지 않는다 (docs/branch-protection.md §0).
+# 협업자가 생기고 보호를 켤 수 있게 되면 역할별 계정으로 나눈다.
+*                                    @vibelabs-web
+/.sdlc/changes/*/test-spec.md        @vibelabs-web
+/.sdlc/changes/*/qc-manifest.json    @vibelabs-web
+/.sdlc/changes/*/qc-tests/           @vibelabs-web
+/.sdlc/changes/*/state.json          @vibelabs-web
+/.sdlc/policies/                     @vibelabs-web
+/.github/workflows/                  @vibelabs-web
