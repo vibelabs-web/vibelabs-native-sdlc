@@ -35,7 +35,7 @@
 
 ## 3. 라벨
 
-`qc-oracle-approved` 라벨은 QA 책임자만 붙일 수 있게 권한(triage 이상)을 제한한다. 워크플로는 QC 자산이 바뀐 PR 에서 이 라벨이 없으면 실패한다.
+`qc-oracle-approved` 라벨은 QA 책임자만 붙일 수 있게 권한(triage 이상)을 제한한다. 워크플로는 QC 자산이 바뀐 PR 에서 이 라벨도, base 정책에 등록된 승인자의 유효한 리뷰도 없으면 실패한다 (`scripts/ci/check_qc_assets.py`).
 
 ## 4. 배포
 

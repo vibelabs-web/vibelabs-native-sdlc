@@ -94,6 +94,15 @@ sdlc github-app status       # 설치 토큰 발급·정책 명단 확인
 3. Build·QC 커밋 push → CI `validate` 성공 → QC_PASSED → REVIEW_PENDING
 4. `auto-approve release`(CI 성공 필수) → `gate RELEASE_APPROVED` → PR 머지
 
+### CI 의 QC 자산 검사 (자율 모드)
+
+PR 이 `test-spec.md`·`qc-manifest.json`·`qc-tests/` 를 바꾸면 `scripts/ci/check_qc_assets.py` 가 다음 중 하나를 요구한다.
+- `qc-oracle-approved` 라벨 (사람 QA 모드), 또는
+- **base 브랜치(main) 정책**의 plan_test 명단에 있는 계정(봇)의 APPROVED 리뷰 + 그 리뷰 커밋 이후 QC 자산 변경 없음
+
+정책을 base 에서 읽으므로 **정책 파일은 QC 자산과 다른 PR 로 먼저 main 에 들어가 있어야 한다** (PR 이 스스로 넣은 정책으로 자기 승인 불가).
+봇 리뷰가 제출되면 `pull_request_review` 이벤트로 CI 가 다시 돌고, 게이트는 같은 커밋의 **가장 최근** 체크 결과를 본다.
+
 ### 이 모드에서 사라지는 것 / 남는 것
 
 - 사라짐: 사람의 판단. "승인"은 결정적 규칙(추적성·오라클 잠금·증거·CI)이 모두 통과했다는 기록이 된다.

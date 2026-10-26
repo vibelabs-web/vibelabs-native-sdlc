@@ -163,7 +163,8 @@ def _verify_ci(change, head: str | None, res: GateResult) -> None:
         return
     runs = data.get("check_runs", []) if isinstance(data, dict) else []
     for name in policy.required_checks(change.project.root):
-        mine = [r for r in runs if r.get("name") == name]
+        # 같은 커밋에 여러 번 돈 경우(리뷰 이벤트 재실행 등) 가장 최근 실행만 본다
+        mine = sorted((r for r in runs if r.get("name") == name), key=lambda r: r.get("id", 0))[-1:]
         if not mine:
             res.manual.append(f"CI: {head[:12]} 에 필수 체크 '{name}' 실행 기록 없음")
         elif any(r.get("status") != "completed" for r in mine):
