@@ -52,3 +52,21 @@ def worktree_add(root: Path, dest: Path, sha: str) -> bool:
 
 def worktree_remove(root: Path, dest: Path) -> None:
     _git(root, "worktree", "remove", "--force", str(dest))
+
+
+def upstream_ref(root: Path) -> str | None:
+    """원격 기본 브랜치 (origin/HEAD → 예: origin/main). 없으면 None."""
+    r = _git(root, "rev-parse", "--abbrev-ref", "origin/HEAD")
+    ref = r.stdout.strip()
+    return ref if r.returncode == 0 and ref and ref != "origin/HEAD" else None
+
+
+def branch_changed_files(root: Path, base: str, upstream: str | None) -> list[str] | None:
+    """base 이후 이 브랜치가 직접 만든 커밋(머지 커밋·upstream 에 이미 있는 커밋 제외)이 바꾼 파일."""
+    args = ["log", "--no-merges", "--format=", "--name-only", f"{base}..HEAD"]
+    if upstream:
+        args += ["--not", upstream]
+    r = _git(root, *args)
+    if r.returncode != 0:
+        return None
+    return sorted({p for p in r.stdout.splitlines() if p.strip()})
