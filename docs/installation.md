@@ -29,7 +29,8 @@ npx github:vibelabs-web/vibelabs-native-sdlc --check    # 상태만
 npx github:vibelabs-web/vibelabs-native-sdlc --remove   # 이 설치기가 만든 것만 제거
 ```
 
-- npm 등록 없이 GitHub 에서 받아 `bin/vibelabs-sdlc.js`(Node 18+, 외부 의존성 없음)를 실행한다.
+- npm 에 `vibelabs-sdlc` 로 등록돼 있어 `npx vibelabs-sdlc [옵션]` 도 같다 (등록본은 npm 에 배포한 버전, `github:` 은 main 최신).
+- `bin/vibelabs-sdlc.js`(Node 18+, 외부 의존성 없음)를 실행한다.
 - `claude` 명령이 있으면 §1 의 플러그인 명령을 대신 실행하고(이미 있으면 update), 없으면 복사 설치로 넘어간다.
 - 복사 설치는 기존 스킬·에이전트나 이 설치기가 만들지 않은 `~/.claude/vibelabs-sdlc` 를 **덮어쓰지 않고 중단**한다. 복사 설치의 진입은 접두사 없는 `/sdlc`.
 - `package.json` 과 `plugin.json` 의 version 은 CI 가 같게 유지시킨다.
@@ -95,3 +96,9 @@ sdlc() { python3 "${SDLC_HOME:-<하네스 루트>}/scripts/sdlc.py" "$@"; }
 python3 -m unittest discover -s tests      # 하네스 자체 테스트
 python3 scripts/sdlc.py eval               # EVAL-001~016 (자동 12 / 수동 4)
 ```
+
+## 부록. npm 배포 절차 (관리자)
+
+1. 배포 파일을 바꾼 PR 은 `package.json`·`plugin.json` version 을 같이 올린다 (CI 강제). main 머지 후 main 에서 배포한다.
+2. 계정은 2FA(auth-and-writes)라 `npm publish --otp=<6자리>`.
+3. 2FA 우회 토큰으로 배포하면 npm 이 스테이징 배포로 처리해 `0.0.0-stage` 자리표시 버전이 생긴다(2026-10-26 첫 배포 때 생김 — 무해, `latest` 는 실제 버전). 토큰을 썼다면 배포 직후 폐기한다.
