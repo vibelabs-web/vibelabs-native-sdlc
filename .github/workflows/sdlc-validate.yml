@@ -36,7 +36,8 @@ jobs:
       - name: Protected QC assets changed in this PR → approval required
         if: startsWith(github.event_name, 'pull_request')
         env:
-          BASE_REF: ${{ github.base_ref }}
+          # github.base_ref 는 pull_request_review 이벤트에서 비어 있다 — 두 이벤트 모두 채워지는 값을 쓴다
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
           LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
