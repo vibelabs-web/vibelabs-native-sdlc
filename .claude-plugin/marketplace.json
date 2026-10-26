@@ -1,0 +1,14 @@
+{
+  "name": "vibelabs-sdlc",
+  "owner": {
+    "name": "vibelabs-web"
+  },
+  "description": "VibeLabs AI-Native SDLC 하네스 플러그인 마켓플레이스",
+  "plugins": [
+    {
+      "name": "vibelabs-sdlc",
+      "source": "./",
+      "description": "AI-Native SDLC 하네스 — /sdlc 진입 스킬, 단계 스킬 8개, 역할 에이전트 7개, 결정적 게이트 CLI(Python 표준 라이브러리)."
+    }
+  ]
+}

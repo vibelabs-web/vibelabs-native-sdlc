@@ -9,7 +9,7 @@ description: VibeLabs AI-Native SDLC 하네스 단일 진입점. 사용자 의�
 > SOP: `docs/02_전체_작업프로세스_SOP.md` · 설계: `docs/03_시스템_상세설계서.md` · 운영: `docs/operator-guide.md`
 
 ```bash
-SDLC="${SDLC_HOME:-$HOME/.claude/skills/sdlc}"   # install.sh 가 이 레포를 심링크
+SDLC="${SDLC_HOME:-${CLAUDE_SKILL_DIR}/../..}"   # 하네스 루트 (플러그인 설치·install.sh 심링크 모두)
 sdlc() { python3 "$SDLC/scripts/sdlc.py" "$@"; }  # 대상 프로젝트 루트에서 실행
 ```
 
@@ -30,6 +30,8 @@ sdlc() { python3 "$SDLC/scripts/sdlc.py" "$@"; }  # 대상 프로젝트 루트�
 | QC_RUNNING | `sdlc-qc-run` | `sdlc-qc-verifier` | `QC_PASSED` 또는 `DEFECT_OPEN` |
 | QC_PASSED · REVIEW_PENDING | `sdlc-release` | `sdlc-release-auditor` | 체크리스트 작성까지 (승인은 외부) |
 | MONITORING | `sdlc-maintain` | — | incident → 새 Intent·회귀 TC |
+
+플러그인으로 설치했으면 스킬·에이전트 이름 앞에 `vibelabs-sdlc:` 가 붙는다 (예: 에이전트 `vibelabs-sdlc:sdlc-builder`). 서브에이전트를 부를 때는 목록에 실제로 있는 이름을 쓴다.
 
 **plan 과 test-spec 은 반드시 서로 다른 서브에이전트 호출로, 같은 승인 spec 만 입력으로 주고 병렬 실행한다.** 한쪽 결과를 다른 쪽 프롬프트에 넣지 않는다 (QC 가 잘못된 계획을 그대로 승인하는 자기참조 방지).
 

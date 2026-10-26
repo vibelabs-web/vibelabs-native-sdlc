@@ -5,7 +5,7 @@ description: SDLC 하네스 7단계 — 운영 인시던트를 incident.md 로 �
 
 # sdlc-maintain — Monitor & Learn
 
-> CLI: `sdlc` = `python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
+> CLI: `sdlc` = `python3 "${SDLC_HOME:-${CLAUDE_SKILL_DIR}/../..}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
 
 **입력**: 운영 지표·알림·사용자 티켓 (읽기 전용 분석) · **출력**: `incident.md`, 새 변경(CHG), eval-case
 
@@ -18,5 +18,5 @@ description: SDLC 하네스 7단계 — 운영 인시던트를 incident.md 로 �
 
 ## 하네스 자체 회귀
 
-- `SKILL.md`·에이전트·훅·CLAUDE.md 를 고쳤으면 `sdlc eval` 실행. 자동 항목 전부 PASS + 수동 항목(EVAL-001/002/007/014)은 전사로 판정.
+- 스킬(`skills/*/SKILL.md`)·에이전트·훅·CLAUDE.md 를 고쳤으면 `sdlc eval` 실행. 자동 항목 전부 PASS + 수동 항목(EVAL-001/002/007/014)은 전사로 판정.
 - 운영 실데이터·고객 정보는 eval 에 넣지 않는다 (개인정보 제거 후 수집).

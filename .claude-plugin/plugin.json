@@ -1,0 +1,9 @@
+{
+  "name": "vibelabs-sdlc",
+  "version": "0.3.0",
+  "description": "AI-Native SDLC 하네스: intent → spec → plan + 독립 test-spec → build → 독립 QC·결함 루프 → 릴리스 체크리스트. 단계 통과를 결정적 CLI 의 게이트·SHA·실행 증거로만 판정한다.",
+  "author": {"name": "vibelabs-web"},
+  "homepage": "https://github.com/vibelabs-web/vibelabs-native-sdlc",
+  "repository": "https://github.com/vibelabs-web/vibelabs-native-sdlc",
+  "keywords": ["sdlc", "qc", "spec", "test-spec", "gate", "evidence"]
+}

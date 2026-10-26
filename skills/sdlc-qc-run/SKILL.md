@@ -5,7 +5,7 @@ description: SDLC 하네스 5단계 — Builder 와 분리된 컨텍스트에서
 
 # sdlc-qc-run — QC & Defect Loop
 
-> CLI: `sdlc` = `python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
+> CLI: `sdlc` = `python3 "${SDLC_HOME:-${CLAUDE_SKILL_DIR}/../..}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
 
 **입력**: 고정 HEAD, 잠긴 spec·test-spec·qc-tests · **출력**: `evidence/RUN-NNN.json`·로그, `issues/BUG-NNN.md`, `qc-report.md`, `traceability.md` · **에이전트**: `sdlc-qc-verifier`
 **종료 조건**: `sdlc gate <id> QC_PASSED` = ALLOW, 또는 `DEFECT_OPEN` 으로 Builder 에 반환

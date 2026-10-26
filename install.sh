@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # vibelabs-native-sdlc: 로컬 스킬·에이전트를 Claude Code 전역 디렉터리에 심링크 등록
 #
-# 진입 스킬 1개(sdlc) + 단계 스킬 8개 + 에이전트 6개. 원본은 이 레포에 있고, 전역에서는 심링크로만 접근한다.
+# 진입 스킬 1개(sdlc) + 단계 스킬 8개 + 에이전트 7개. 플러그인으로 설치했다면 이 스크립트는 필요 없다. 원본은 이 레포에 있고, 전역에서는 심링크로만 접근한다.
 # 기존 파일(심링크가 아닌 것)이나 다른 곳을 가리키는 심링크는 절대 덮어쓰지 않는다.
 #
 # 사용법:
@@ -21,8 +21,8 @@ case "${1:-}" in
   *) echo "알 수 없는 옵션: $1" >&2; exit 2 ;;
 esac
 
-MAP=("$SKILLS_DIR/sdlc:$ROOT")
-for d in "$ROOT"/skills/sdlc-*/; do
+MAP=()
+for d in "$ROOT"/skills/sdlc*/; do
   n="$(basename "$d")"; MAP+=("$SKILLS_DIR/$n:${d%/}")
 done
 for f in "$ROOT"/agents/sdlc-*.md; do

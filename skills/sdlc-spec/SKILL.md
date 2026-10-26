@@ -5,7 +5,7 @@ description: SDLC 하네스 2단계 — 승인된 intent 에서 REQ-ID 별 단�
 
 # sdlc-spec — Specify → spec.md
 
-> CLI: `sdlc` = `python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
+> CLI: `sdlc` = `python3 "${SDLC_HOME:-${CLAUDE_SKILL_DIR}/../..}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
 
 **입력**: 승인된 `intent.md`(기준선 SHA 고정), 정책, 기존 아키텍처 · **출력**: `spec.md` · **에이전트**: `sdlc-spec-writer`
 **종료 조건**: `sdlc gate <id> SPEC_APPROVED --dry-run` BLOCK 사유 0
