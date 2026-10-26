@@ -153,15 +153,29 @@
       "dirty": false,
       "log_path": "build/BUILD-004.log",
       "log_sha256": "a6707d4eff38012da33ddc34bc6dc076a3b17151cfc9aef223c8790cbe64c3da"
+    },
+    {
+      "at": "2026-10-26T10:48:00Z",
+      "cmd": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "app"
+      ],
+      "exit_code": 0,
+      "commit_sha": "765b8594a2a5d7b730c1a18ee88bf27c7dd4614d",
+      "dirty": false,
+      "log_path": "build/BUILD-005.log",
+      "log_sha256": "a6707d4eff38012da33ddc34bc6dc076a3b17151cfc9aef223c8790cbe64c3da"
     }
   ],
-  "last_verification_run": "RUN-003",
+  "last_verification_run": "RUN-004",
   "retry_budget": {
     "per_defect": 3
   },
-  "blocked_reasons": [
-    "[ERROR] CI_CHECK_FAILED: 필수 체크 'validate' = ['failure'] @ 42ee980dadfc"
-  ],
+  "blocked_reasons": [],
   "known_ids": [
     "REQ-001",
     "REQ-002",
@@ -176,8 +190,8 @@
   ],
   "retired_ids": [],
   "counters": {
-    "build": 4,
-    "run": 3
+    "build": 5,
+    "run": 4
   },
   "history": [
     {
@@ -400,7 +414,47 @@
       "event": "gate_refused",
       "to": "RELEASE_APPROVED",
       "decision": "BLOCK"
+    },
+    {
+      "at": "2026-10-26T10:48:00Z",
+      "event": "transition",
+      "from": "REVIEW_PENDING",
+      "to": "BUILDING",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:48:07Z",
+      "event": "transition",
+      "from": "BUILDING",
+      "to": "QC_RUNNING",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:48:07Z",
+      "event": "qc_run",
+      "run": "RUN-004",
+      "commit": "765b8594a2a5d7b730c1a18ee88bf27c7dd4614d",
+      "results": {
+        "TC-001": "PASS",
+        "TC-002": "PASS",
+        "TC-003": "PASS",
+        "TC-004": "PASS"
+      }
+    },
+    {
+      "at": "2026-10-26T10:48:14Z",
+      "event": "transition",
+      "from": "QC_RUNNING",
+      "to": "QC_PASSED",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:48:21Z",
+      "event": "transition",
+      "from": "QC_PASSED",
+      "to": "REVIEW_PENDING",
+      "decision": "ALLOW"
     }
   ],
-  "updated_at": "2026-10-26T10:44:25Z"
+  "updated_at": "2026-10-26T10:48:21Z"
 }
