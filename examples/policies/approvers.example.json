@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "scopes": {
+    "intent": ["<po-login>"],
+    "spec": ["<po-login>"],
+    "plan_test": ["<qa-lead-login>", "<tech-lead-login>"],
+    "security": ["<security-owner-login>"],
+    "release": ["<ops-owner-login>"]
+  },
+  "required_checks": ["validate"]
+}

@@ -9,11 +9,15 @@
 | `draft <id> <artifact>` | 템플릿에서 초안 (기존 파일 덮어쓰지 않음) | 0/2 |
 | `validate <id>\|--all [--strict] [--json]` | 스키마·ID·추적성·기준선 드리프트·오라클 잠금·skip·BUG 스키마 | 0/1 |
 | `approve <id> intent\|spec\|plan_test\|release` | **사람 전용 (TTY)** 로컬 승인 E1 | 0/2 |
+| `approve-github <id> <scope> --review <url>` | GitHub PR 리뷰를 승인 원본으로 등록 (E2, 매 게이트 재검증) | 0 VERIFIED / 1 INVALID / 3 확인 불가 |
 | `gate <id> <STAGE> [--dry-run] [--json]` | 전이 판정, ALLOW 면 적용 | 0 ALLOW / 1 BLOCK / 3 MANUAL |
 | `reopen <id> --to INTENT_DRAFT\|SPEC_DRAFT\|PLAN_TEST_DRAFT --reason R` | 재기준화: 해당 승인·기준선·잠금 제거, 이전 RUN stale | 0/2 |
 | `build check <id> -- <cmd>` | Builder 자체 검사 기록 (QC_RUNNING 조건) | 명령 exit |
 | `qc run <id> [--isolated] [--allow-dirty]` | 고정 SHA QC 실행 → RUN 증거, BUG 발행·재검증 | 0 전부 PASS / 1 |
 | `bug list\|new\|transition\|classify` | 결함 티켓 | 0/2 |
+| `bug comment <id> BUG --role R --body T` | QC·Builder 대화 (로컬 Discussion + Issue 댓글) | 0 |
+| `bug sync <id> [--dry-run]` | BUG ↔ GitHub Issue 동기화 | 0 / 3 GitHub 불가 |
+| `bug board` | 전체 버그 보드 `.sdlc/BUGS.md` | 0 |
 | `report <id>` | traceability.md·qc-report.md 생성, 커버리지 | 0 |
 | `drift <id>` | plan.md 대비 계획 밖 변경 | 0/1 |
 | `release <id>` | review.md·release.md 초안 (명령 실행 없음) | 0 |
@@ -26,7 +30,7 @@
 ```
 INTAKE → INTENT_DRAFT → INTENT_APPROVED* → SPEC_DRAFT → SPEC_APPROVED* → PLAN_TEST_DRAFT → BASELINE_APPROVED*
 → BUILDING → QC_RUNNING → {DEFECT_OPEN → BUILDING | QC_PASSED → REVIEW_PENDING → RELEASE_APPROVED** → MONITORING}
-(* 로컬 E1 승인 가능 — high-risk 제외 · ** 외부 E2 승인 필수, 로컬 MVP 에서는 항상 MANUAL)
+(* 로컬 E1 승인 가능 — high-risk 는 GitHub 리뷰 E2 + security 승인 · ** GitHub 리뷰 E2(커밋=HEAD) + 필수 CI 체크 성공)
 ```
 
 ## 3. 게이트가 보는 것
@@ -36,17 +40,17 @@ INTAKE → INTENT_DRAFT → INTENT_APPROVED* → SPEC_DRAFT → SPEC_APPROVED* �
 | 모든 단계 | 허용된 전이, 구조 error 0, 이전 승인 전부 VERIFIED + 묶인 SHA 일치 |
 | INTENT_APPROVED | intent 필수 섹션·자리표시자 0·차단 OPEN 0, intent 승인 |
 | SPEC_APPROVED | spec 의 REQ 원천·자리표시자 0, spec 승인 |
-| BASELINE_APPROVED | 모든 must REQ 에 TASK·TC·qc-manifest 명령, 미결정 REQ 에 TC 없음, plan_test 승인 → 기준선·QC 잠금 기록 |
+| BASELINE_APPROVED | 모든 must REQ 에 TASK·TC·qc-manifest 명령, 미결정 REQ 에 TC 없음, plan_test 승인 (high-risk: + 정책 명단의 다른 사람 security 승인) → 기준선·QC 잠금 기록 |
 | QC_RUNNING | git HEAD, `.sdlc/` 밖 미커밋 0, 현재 HEAD 의 build check exit 0, 계획 밖 변경 0 |
 | DEFECT_OPEN | 미해결 BUG ≥ 1 |
 | BUILDING (from DEFECT_OPEN) | escalated/blocked_spec BUG 가 있으면 MANUAL |
 | QC_PASSED · REVIEW_PENDING | 최신 RUN 무결(report_sha256·로그 해시) · commit = HEAD · 기준선 일치 · dirty 아님 · 모든 must TC = PASS · 미해결 BUG 0 |
-| RELEASE_APPROVED | 위 + release 승인 E2 (외부) |
+| RELEASE_APPROVED | 위 + release GitHub 리뷰 E2 (리뷰 커밋 = HEAD) + 필수 CI 체크(`required_checks`) 성공 |
 | INTENT_DRAFT (from MONITORING) | incident.md 의 새 Intent·REQ/TC/EVAL·담당자 채워짐 |
 
 ## 4. 증거 등급
 
-E0 AI 진술만 (게이트 불가) · E1 로컬 명령 로그/로컬 TTY 승인 · E2 신뢰 CI 실행·외부 승인 (미구현) · E3 독립 재현 환경.
+E0 AI 진술만 (게이트 불가) · E1 로컬 명령 로그/로컬 TTY 승인 · E2 GitHub PR 리뷰 승인·신뢰 CI 체크 · E3 독립 재현 환경 (미구현).
 `sdlc qc run` 증거는 E1 이다. 사용자 합격 결정에는 E2 이상을 권고한다 (설계서 §5.4).
 
 ## 5. 사람을 부르는 시점 (SOP §8)
@@ -63,3 +67,7 @@ escalated·blocked_spec 해제는 `sdlc bug transition … --to triaged --role h
   traceability.md qc-report.md review.md release.md   # 자동 생성 초안
   build/BUILD-NNN.log   evidence/RUN-NNN.json + RUN-NNN/TC-*.log   issues/BUG-NNN.md
 ```
+
+## 7. 버그 추적
+
+`docs/github-integration.md` §3. 요약: BUG 파일이 원본, `bug comment` 로 대화, `bug sync` 로 GitHub Issue 에 비추기, `bug board` 로 전체 보기.

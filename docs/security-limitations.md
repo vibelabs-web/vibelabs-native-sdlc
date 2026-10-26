@@ -11,7 +11,8 @@
 | PreToolUse 가드 훅 | `scripts/hooks/guard_paths.py` | Edit/Write 로 잠긴 오라클·state·evidence 수정, 경로가 드러난 셸 쓰기 | **확인된 우회**: 경로를 문자열로 조립하는 스크립트(`python3 rewrite.py`), 변수·글롭 사용, 훅 미설치 세션. `tests/test_acceptance.py::AT16` 이 이 우회를 실제로 재현한다 |
 | 결정적 검증 | `sdlc validate`/`gate`/`ci` | 기준선 드리프트, 오라클 변조·삭제·skip, 가짜 승인 레코드, 오래된 증거, 계획 밖 변경 | 같은 사용자가 `state.json` 의 기준선·잠금 해시까지 함께 고치면 로컬 검사는 일관된 상태로 보인다 → **CI 에서 PR diff 로 잡아야 함** |
 | 로컬 승인 서명 | `sdlc approve` (TTY + 프로젝트 밖 HMAC 키) | 에이전트가 승인 레코드를 손으로 쓰는 것 | 키 파일은 같은 사용자가 읽을 수 있음. 의사 TTY(`script`, `expect`)로 TTY 확인 우회 가능 → 그래서 **E1 등급**이며 high-risk·release 게이트에서는 불인정 |
-| 외부 승인 검증기 | `GitHubReviewVerifier` | — | **미구현**. 항상 UNVERIFIABLE → MANUAL_VERIFICATION_REQUIRED (fail-closed) |
+| 외부 승인 검증기 (M2) | `GitHubReviewVerifier` — APPROVED·자기 승인 차단·쓰기 권한·정책 명단·리뷰 커밋 내용 일치 | 문자열만 적은 승인, 자기 승인, 리뷰 후 바뀐 내용의 승인 | 에이전트가 **승인권자 계정의 gh 토큰**을 쥐면 그 계정으로 리뷰 가능. 권한은 확인 시점 기준. 정책 파일은 CODEOWNERS 로 보호해야 함 |
+| 버그 Issue 동기화 (M2) | `sdlc bug sync` | Issue 닫기·라벨 변경으로 결함을 "해결" 처리하는 것 (다음 sync 때 되돌림) | sync 를 돌리지 않으면 GitHub 쪽 표시가 오래된 상태로 남음. Issue 본문에 SHA·로그 경로가 올라감 |
 | CI 워크플로 | `.github/workflows/sdlc-validate.yml` | PR 단위 검증, QC 자산 변경 시 라벨 리뷰 요구 | required status check·CODEOWNERS·라벨 권한을 운영자가 설정해야만 강제됨 (`docs/branch-protection.md`) |
 
 ## 2. 하지 않는 것 (MVP 범위 밖)
@@ -24,7 +25,7 @@
 
 1. **보호 브랜치 + required check**: `sdlc-validate` 를 필수 체크로, `.sdlc/changes/*/test-spec.md`·`qc-manifest.json`·`qc-tests/`·`state.json` 에 CODEOWNERS(QA 책임자) 지정. 승인 후 새 커밋 시 리뷰 무효화(dismiss stale reviews) 켜기.
 2. **역할별 작업공간 분리**: Builder 는 별도 worktree/컨테이너에서 `.sdlc/` 를 읽기 전용 마운트. QC Verifier 는 `sdlc qc run --isolated` 로 HEAD 고정 worktree 에서 실행.
-3. **승인 원본 외부화**: `approvals[scope]` 에 PR 리뷰 ID 를 기록하고 GitHub API 로 승인자 권한·리뷰 시점 SHA 를 검증하는 `GitHubReviewVerifier` 구현 (M2).
+3. **승인 원본 외부화**: M2 에서 구현 완료 (`docs/github-integration.md`). 남은 일: 승인권자 계정 토큰을 에이전트 환경에서 분리, 정책 파일 CODEOWNERS 지정.
 4. **CI 에서 기준선 재계산**: PR 의 base 브랜치 `state.json` 과 head 의 기준선 해시를 비교해, 기준선이 승인 없이 함께 바뀌었으면 실패.
 5. **조직 관리 설정**: managed settings 로 가드 훅을 강제 설치하고 프로젝트 수준 해제를 막는다.
 6. 배포 자격 증명은 에이전트 세션·이 워크플로에 절대 주지 않는다.

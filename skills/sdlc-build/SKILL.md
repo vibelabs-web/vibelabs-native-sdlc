@@ -20,10 +20,11 @@ description: SDLC 하네스 4단계 — 고정된 spec/plan/test-spec 기준으�
 
 ## BUG 수정 루프 (SOP §4 단계 5)
 
-1. `sdlc bug list <id>` → BUG 파일의 재현 절차·기대/실제·SHA·로그를 읽는다.
+1. `sdlc bug list <id>` → BUG 파일의 재현 절차·기대/실제·SHA·로그와 `## Discussion`(QC·사람 댓글)을 읽는다. GitHub 원격이 있으면 먼저 `sdlc bug sync <id>`.
 2. 재현 → 원인 지점 특정 → 수정 → 자체 테스트로 재발하지 않는지 확인 (디버깅 순서).
 3. `sdlc bug transition <id> BUG-NNN --to triaged|in_progress --role builder`, 커밋 후 `--to ready_for_retest --role builder`.
-4. `verified_fixed`/`reopened` 는 QC 재실행만 판정한다 — Builder 가 바꿀 수 없다.
+4. 원인·수정 내용은 `sdlc bug comment <id> BUG-NNN --role builder --body "원인: … / 수정: <commit>"` 로 남긴다.
+5. `verified_fixed`/`reopened` 는 QC 재실행만 판정한다 — Builder 가 바꿀 수 없다.
 
 ## 금지 (가드 훅·CI 가 감시)
 
