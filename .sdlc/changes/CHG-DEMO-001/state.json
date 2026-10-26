@@ -2,7 +2,7 @@
   "schema_version": "1.0",
   "change_id": "CHG-DEMO-001",
   "title": "행사 신청 및 대기자 자동 관리",
-  "stage": "BUILDING",
+  "stage": "REVIEW_PENDING",
   "risk_level": "standard",
   "risk_hits": [],
   "source_refs": [
@@ -109,22 +109,29 @@
       "dirty": false,
       "log_path": "build/BUILD-002.log",
       "log_sha256": "a6707d4eff38012da33ddc34bc6dc076a3b17151cfc9aef223c8790cbe64c3da"
+    },
+    {
+      "at": "2026-10-26T10:38:51Z",
+      "cmd": [
+        "python3",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "app"
+      ],
+      "exit_code": 0,
+      "commit_sha": "d81c9bcc6d948a91a8fc8cb46720888a696e9b76",
+      "dirty": false,
+      "log_path": "build/BUILD-003.log",
+      "log_sha256": "a6707d4eff38012da33ddc34bc6dc076a3b17151cfc9aef223c8790cbe64c3da"
     }
   ],
-  "last_verification_run": "RUN-001",
+  "last_verification_run": "RUN-002",
   "retry_budget": {
     "per_defect": 3
   },
-  "blocked_reasons": [
-    "[BLOCKER] PLAN_DRIFT: 계획 밖 변경: .github/workflows/sdlc-validate.yml — 중지→영향 분석→plan 개정·재승인 (plan.md)",
-    "[BLOCKER] PLAN_DRIFT: 계획 밖 변경: docs/branch-protection.md — 중지→영향 분석→plan 개정·재승인 (plan.md)",
-    "[BLOCKER] PLAN_DRIFT: 계획 밖 변경: docs/github-integration.md — 중지→영향 분석→plan 개정·재승인 (plan.md)",
-    "[BLOCKER] PLAN_DRIFT: 계획 밖 변경: docs/implementation-decisions.md — 중지→영향 분석→plan 개정·재승인 (plan.md)",
-    "[BLOCKER] PLAN_DRIFT: 계획 밖 변경: scripts/ci/check_qc_assets.py — 중지→영향 분석→plan 개정·재승인 (plan.md)",
-    "[BLOCKER] PLAN_DRIFT: 계획 밖 변경: scripts/validators/gate.py — 중지→영향 분석→plan 개정·재승인 (plan.md)",
-    "[BLOCKER] PLAN_DRIFT: 계획 밖 변경: tests/test_ci_qc_assets.py — 중지→영향 분석→plan 개정·재승인 (plan.md)",
-    "[BLOCKER] PLAN_DRIFT: 계획 밖 변경: tests/test_github.py — 중지→영향 분석→plan 개정·재승인 (plan.md)"
-  ],
+  "blocked_reasons": [],
   "known_ids": [
     "REQ-001",
     "REQ-002",
@@ -139,8 +146,8 @@
   ],
   "retired_ids": [],
   "counters": {
-    "build": 2,
-    "run": 1
+    "build": 3,
+    "run": 2
   },
   "history": [
     {
@@ -269,7 +276,40 @@
       "event": "gate_refused",
       "to": "QC_RUNNING",
       "decision": "BLOCK"
+    },
+    {
+      "at": "2026-10-26T10:38:59Z",
+      "event": "transition",
+      "from": "BUILDING",
+      "to": "QC_RUNNING",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:39:00Z",
+      "event": "qc_run",
+      "run": "RUN-002",
+      "commit": "d81c9bcc6d948a91a8fc8cb46720888a696e9b76",
+      "results": {
+        "TC-001": "PASS",
+        "TC-002": "PASS",
+        "TC-003": "PASS",
+        "TC-004": "PASS"
+      }
+    },
+    {
+      "at": "2026-10-26T10:39:07Z",
+      "event": "transition",
+      "from": "QC_RUNNING",
+      "to": "QC_PASSED",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:39:14Z",
+      "event": "transition",
+      "from": "QC_PASSED",
+      "to": "REVIEW_PENDING",
+      "decision": "ALLOW"
     }
   ],
-  "updated_at": "2026-10-26T10:36:35Z"
+  "updated_at": "2026-10-26T10:39:14Z"
 }

@@ -1,0 +1,72 @@
+{
+  "run_id": "RUN-002",
+  "change_id": "CHG-DEMO-001",
+  "commit_sha": "d81c9bcc6d948a91a8fc8cb46720888a696e9b76",
+  "spec_sha": "f844ac143c96e55842a3e7ec6d52fe798b8ef786",
+  "test_spec_sha": "cb3c0c0b56921cdb31730997310ce731adeed077",
+  "qc_manifest_sha": "c94414f5179899e61003c1f8d4018f6780c5c814",
+  "qc_tests_sha": "86971b9ea15f4df53380c41a5acadadb15bb6213a58953c6949d0b529d936277",
+  "environment": "isolated-worktree:darwin-py3.14.8",
+  "worktree_dirty": false,
+  "started_at": "2026-10-26T10:38:59Z",
+  "finished_at": "2026-10-26T10:39:00Z",
+  "commands": [
+    {
+      "tc_id": "TC-001",
+      "cmd": "python3 -m unittest -v test_registration_qc.TC001",
+      "exit_code": 0,
+      "log_path": "evidence/RUN-002/TC-001.log",
+      "log_sha256": "1ed6fb5b8b3b2de5ed7be390d5fae01a85a837863267536a04a235905a68bc8d"
+    },
+    {
+      "tc_id": "TC-002",
+      "cmd": "python3 -m unittest -v test_registration_qc.TC002",
+      "exit_code": 0,
+      "log_path": "evidence/RUN-002/TC-002.log",
+      "log_sha256": "7452ee8c394b399d82641b76449b1c20cc5f507e78cdfad364a52e7a68c020d9"
+    },
+    {
+      "tc_id": "TC-003",
+      "cmd": "python3 -m unittest -v test_registration_qc.TC003",
+      "exit_code": 0,
+      "log_path": "evidence/RUN-002/TC-003.log",
+      "log_sha256": "aa075ee535d978b88b1dbed80166dc7f09cbc226ce92cf515a9f98685e702578"
+    },
+    {
+      "tc_id": "TC-004",
+      "cmd": "python3 -m unittest -v test_registration_qc.TC004",
+      "exit_code": 0,
+      "log_path": "evidence/RUN-002/TC-004.log",
+      "log_sha256": "e5370fc132abdb5cb0148be9032505df647a35d6d58ddd9e26d8e1245e6c6513"
+    }
+  ],
+  "cases": [
+    {
+      "tc_id": "TC-001",
+      "result": "PASS",
+      "evidence": "evidence/RUN-002/TC-001.log",
+      "summary": "OK"
+    },
+    {
+      "tc_id": "TC-002",
+      "result": "PASS",
+      "evidence": "evidence/RUN-002/TC-002.log",
+      "summary": "OK"
+    },
+    {
+      "tc_id": "TC-003",
+      "result": "PASS",
+      "evidence": "evidence/RUN-002/TC-003.log",
+      "summary": "OK"
+    },
+    {
+      "tc_id": "TC-004",
+      "result": "PASS",
+      "evidence": "evidence/RUN-002/TC-004.log",
+      "summary": "OK"
+    }
+  ],
+  "verifier_role": "qc-verifier",
+  "evidence_level": "E1",
+  "report_sha256": "f50f54c7cad68a96820b274f7ab38956eb45551188c7b85c59aa167542dd49a5"
+}
