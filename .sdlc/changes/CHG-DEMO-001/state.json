@@ -1,0 +1,40 @@
+{
+  "schema_version": "1.0",
+  "change_id": "CHG-DEMO-001",
+  "title": "행사 신청 및 대기자 자동 관리",
+  "stage": "INTENT_DRAFT",
+  "risk_level": "standard",
+  "risk_hits": [],
+  "source_refs": [
+    "examples/event-registration"
+  ],
+  "created_at": "2026-10-26T10:29:52Z",
+  "baselines": {},
+  "approvals": {},
+  "qc_lock": {},
+  "build_base_sha": null,
+  "build_checks": [],
+  "last_verification_run": null,
+  "retry_budget": {
+    "per_defect": 3
+  },
+  "blocked_reasons": [],
+  "known_ids": [],
+  "retired_ids": [],
+  "counters": {},
+  "history": [
+    {
+      "at": "2026-10-26T10:29:52Z",
+      "event": "transition",
+      "from": "INTAKE",
+      "to": "INTENT_DRAFT",
+      "decision": "ALLOW"
+    },
+    {
+      "at": "2026-10-26T10:29:52Z",
+      "event": "demo_init",
+      "source": "examples/event-registration"
+    }
+  ],
+  "updated_at": "2026-10-26T10:29:52Z"
+}

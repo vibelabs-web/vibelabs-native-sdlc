@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "mode": "autonomous",
+  "scopes": {
+    "intent": ["vibelabs-sdlc-gatekeeper[bot]"],
+    "spec": ["vibelabs-sdlc-gatekeeper[bot]"],
+    "plan_test": ["vibelabs-sdlc-gatekeeper[bot]"],
+    "security": ["vibelabs-sdlc-gatekeeper[bot]"],
+    "release": ["vibelabs-sdlc-gatekeeper[bot]"]
+  },
+  "require_distinct_security_reviewer": false,
+  "required_checks": ["validate"]
+}
