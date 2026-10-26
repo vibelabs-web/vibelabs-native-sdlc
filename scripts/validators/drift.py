@@ -31,7 +31,8 @@ def check(change, plan) -> tuple[list[Issue], list[str]]:
     base = change.state.get("build_base_sha")
     if not base:
         return [warn("DRIFT_UNCHECKED", "build_base_sha 없음 — 드리프트 미검증")], []
-    changed = gitutil.changed_files(change.project.root, base)
+    # main 을 합쳐 들어온 변경은 이 브랜치의 작업이 아니다 — 브랜치가 직접 만든 커밋만 본다
+    changed = gitutil.branch_changed_files(change.project.root, base, gitutil.upstream_ref(change.project.root))
     if changed is None:
         return [blocker("DRIFT_UNKNOWN", f"git diff {base[:12]}..HEAD 실패 — 드리프트 확인 불가")], []
     changed = [p for p in changed if not p.startswith(".sdlc/")]
