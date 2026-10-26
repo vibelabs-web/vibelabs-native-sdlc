@@ -84,3 +84,7 @@ python3 scripts/sdlc.py eval                  # EVAL-001~016
 ```
 
 설치 `docs/installation.md` · 운영 `docs/operator-guide.md` · 설계 차이 `docs/implementation-decisions.md` · 보안 한계 `docs/security-limitations.md`
+
+## 라이선스
+
+MIT — `LICENSE`.
