@@ -19,6 +19,7 @@
 /.sdlc/changes/*/qc-tests/           @<qa-lead>
 /.sdlc/changes/*/state.json          @<qa-lead> @<tech-lead>
 /.sdlc/changes/*/spec.md             @<product-owner>
+/.sdlc/policies/                     @<repo-admin> @<security-owner>
 /.github/workflows/                  @<repo-admin>
 ```
 

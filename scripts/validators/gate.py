@@ -10,7 +10,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass, field
 
-from core import bugs, gitutil, state as sm
+from core import bugs, gitutil, policy, state as sm
 from core.util import now_iso
 from validators import approvals, check, drift, evidence, tamper
 from validators.issues import Issue, blocker, err
@@ -66,7 +66,7 @@ def required_level(change, scope: str) -> str:
     return "E1"
 
 
-def _prior_scopes(target: str) -> list[str]:
+def _prior_scopes(target: str, high: bool = False) -> list[str]:
     idx = sm.STAGES.index(target if target != "DEFECT_OPEN" else "QC_RUNNING")
     scopes = []
     if idx > sm.STAGES.index("INTENT_APPROVED"):
@@ -75,6 +75,8 @@ def _prior_scopes(target: str) -> list[str]:
         scopes.append("spec")
     if idx > sm.STAGES.index("BASELINE_APPROVED"):
         scopes.append("plan_test")
+        if high:
+            scopes.append("security")
     if idx > sm.STAGES.index("RELEASE_APPROVED"):
         scopes.append("release")
     return scopes
@@ -84,7 +86,21 @@ def current_bound(change, scope: str) -> dict:
     return {art: change.artifact_sha(art) for art in sm.APPROVAL_SCOPES[scope]}
 
 
-def _verify_approval(change, scope: str, res: GateResult) -> None:
+def make_github_record(change, scope: str, review_url: str) -> dict:
+    root = change.project.root
+    if scope == "release":
+        bound = {"commit": gitutil.head(root), "qc_run": change.state.get("last_verification_run")}
+        paths = {}
+    else:
+        bound = current_bound(change, scope)
+        paths = {art: (change.qc_tests_dir if art == "qc_tests" else change.path(art)).relative_to(root).as_posix()
+                 for art in bound}
+    return {"scope": scope, "kind": "github_review", "ref": review_url, "bound": bound, "paths": paths,
+            "at": now_iso()}
+
+
+def _verify_approval(change, scope: str, res: GateResult) -> str | None:
+    """검증되면 승인자(actor)를 돌려준다."""
     rec = (change.state.get("approvals") or {}).get(scope)
     if not rec:
         res.manual.append(f"{scope}: 승인 레코드 없음 — 승인권자가 `sdlc approve {change.id} {scope}` (TTY) 또는 "
@@ -116,6 +132,44 @@ def _verify_approval(change, scope: str, res: GateResult) -> None:
         head = gitutil.head(change.project.root)
         if (rec.get("bound") or {}).get("commit") != head:
             res.block(err("APPROVAL_STALE", "release 승인 커밋 ≠ 현재 HEAD — 승인 무효"))
+    return vr.actor or rec.get("approver")
+
+
+def _verify_security(change, res: GateResult, primary: str | None) -> None:
+    """high-risk: plan_test 와 별개로 정책에 등록된 보안/정책 소유자의 외부 승인 (SOP §1)."""
+    allowed = policy.allowed_reviewers(change.project.root, "security")
+    if not allowed:
+        res.manual.append(f"security: high-risk 변경은 {policy.POLICY_REL} 에 security 승인자 명단이 필요")
+        return
+    actor = _verify_approval(change, "security", res)
+    if actor and primary and actor.lower() == primary.lower():
+        res.block(err("SECURITY_SAME_REVIEWER", f"security 승인자 {actor} 가 plan_test 승인자와 같음 — 독립 승인 필요"))
+
+
+def _verify_ci(change, head: str | None, res: GateResult) -> None:
+    """E2 증거: 현재 HEAD 에 대한 신뢰 CI 의 필수 체크 성공 (설계서 §5.4)."""
+    from core import github
+    slug = github.repo_slug(change.project.root)
+    if not head or not slug:
+        res.manual.append("CI: GitHub 원격/커밋을 확인할 수 없음 — 필수 체크 검증 불가")
+        return
+    try:
+        data = github.client().api(f"repos/{slug}/commits/{head}/check-runs?per_page=100")
+    except github.GhUnavailable as e:
+        res.manual.append(f"CI: GitHub 확인 불가 ({e})")
+        return
+    except github.GhError as e:
+        res.manual.append(f"CI: {head[:12]} 체크 조회 실패 — push 되지 않은 커밋일 수 있음 ({e.status})")
+        return
+    runs = data.get("check_runs", []) if isinstance(data, dict) else []
+    for name in policy.required_checks(change.project.root):
+        mine = [r for r in runs if r.get("name") == name]
+        if not mine:
+            res.manual.append(f"CI: {head[:12]} 에 필수 체크 '{name}' 실행 기록 없음")
+        elif any(r.get("status") != "completed" for r in mine):
+            res.manual.append(f"CI: 필수 체크 '{name}' 아직 실행 중")
+        elif not all(r.get("conclusion") == "success" for r in mine):
+            res.block(err("CI_CHECK_FAILED", f"필수 체크 '{name}' = {[r.get('conclusion') for r in mine]} @ {head[:12]}"))
 
 
 def _relevant_blockers(target: str, issues: list[Issue]) -> list[Issue]:
@@ -189,10 +243,17 @@ def gate(change, target: str) -> GateResult:
     for i in _relevant_blockers(target, rep.issues):
         res.block(i)
 
-    for scope in _prior_scopes(target):
-        _verify_approval(change, scope, res)
+    high = st.get("risk_level") == "high"
+    actors = {}
+    for scope in _prior_scopes(target, high):
+        if scope == "security":
+            _verify_security(change, res, actors.get("plan_test"))
+        else:
+            actors[scope] = _verify_approval(change, scope, res)
     if target in APPROVAL_GATES:
-        _verify_approval(change, APPROVAL_GATES[target], res)
+        actors[APPROVAL_GATES[target]] = _verify_approval(change, APPROVAL_GATES[target], res)
+    if target == "BASELINE_APPROVED" and high:
+        _verify_security(change, res, actors.get("plan_test"))
 
     head = gitutil.head(change.project.root)
     if target == "QC_RUNNING":
@@ -219,6 +280,8 @@ def gate(change, target: str) -> GateResult:
                 res.manual.append(f"{b.id}: {b.status} — 재시도 예산 초과/명세 충돌, 사람의 결정 전 자동 수정 중지")
     if target in QC_EVIDENCE_GATES:
         qc_results(change, rep, head, res)
+    if target == "RELEASE_APPROVED" or (high and target == "QC_PASSED"):
+        _verify_ci(change, head, res)
     if target == "INTENT_DRAFT" and cur == "MONITORING":
         _incident_closed_loop(change, res)
     return res.finalize()

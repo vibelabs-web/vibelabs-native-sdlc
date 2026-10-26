@@ -31,8 +31,10 @@ class Sandbox:
         self.root = self.base / "repo"
         self.root.mkdir()
         self.key = self.base / "approval.key"
-        self._old_key = os.environ.get("SDLC_APPROVAL_KEY_FILE")
+        self._old_env = {k: os.environ.get(k) for k in ("SDLC_APPROVAL_KEY_FILE", "SDLC_GITHUB_OFFLINE", "SDLC_GITHUB_REPO")}
         os.environ["SDLC_APPROVAL_KEY_FILE"] = str(self.key)
+        os.environ["SDLC_GITHUB_OFFLINE"] = "1"  # 샌드박스는 외부 호출 없음 — 필요한 테스트만 가짜 클라이언트 주입
+        os.environ.pop("SDLC_GITHUB_REPO", None)
         git(self.root, "init", "-q")
         git(self.root, "config", "user.name", "sandbox")
         git(self.root, "config", "user.email", "sandbox@example.invalid")
@@ -40,10 +42,13 @@ class Sandbox:
         self.project = Project(self.root)
 
     def close(self):
-        if self._old_key is None:
-            os.environ.pop("SDLC_APPROVAL_KEY_FILE", None)
-        else:
-            os.environ["SDLC_APPROVAL_KEY_FILE"] = self._old_key
+        for k, v in self._old_env.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+        from core import github
+        github.set_client(None)
         subprocess.run(["git", "-C", str(self.root), "worktree", "prune"], capture_output=True)
         shutil.rmtree(self.base, ignore_errors=True)
 

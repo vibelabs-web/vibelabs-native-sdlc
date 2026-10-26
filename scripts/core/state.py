@@ -33,6 +33,7 @@ APPROVAL_SCOPES: dict[str, list[str]] = {
     "spec": ["intent", "spec"],
     "plan_test": ["spec", "plan", "test_spec", "qc_manifest", "qc_tests"],
     "release": [],
+    "security": ["spec", "plan", "test_spec"],  # high-risk 추가 승인 (보안/정책 소유자)
 }
 
 # 산출물 변경 시 무효화(stale)되는 대상 (SOP §6)
@@ -47,9 +48,9 @@ INVALIDATION: dict[str, list[str]] = {
 
 # reopen 목적지에서 지워야 하는 승인
 REOPEN_CLEARS: dict[str, list[str]] = {
-    "INTENT_DRAFT": ["intent", "spec", "plan_test", "release"],
-    "SPEC_DRAFT": ["spec", "plan_test", "release"],
-    "PLAN_TEST_DRAFT": ["plan_test", "release"],
+    "INTENT_DRAFT": ["intent", "spec", "plan_test", "security", "release"],
+    "SPEC_DRAFT": ["spec", "plan_test", "security", "release"],
+    "PLAN_TEST_DRAFT": ["plan_test", "security", "release"],
 }
 
 BUG_TRANSITIONS: dict[str, list[str]] = {

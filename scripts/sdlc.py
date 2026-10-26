@@ -161,6 +161,30 @@ def cmd_approve(args):
     return 0
 
 
+def cmd_approve_github(args):
+    """GitHub PR 리뷰를 승인 원본으로 등록한다. 진위는 등록 시점과 매 게이트마다 GitHub API 로 다시 확인한다."""
+    from core import github
+    ch = project(args).load(args.change_id)
+    scope = args.scope
+    if not github.parse_review_url(args.review):
+        raise SdlcError("--review 는 https://github.com/<owner>/<repo>/pull/<n>#pullrequestreview-<id> 형식")
+    root = ch.project.root
+    rec = g.make_github_record(ch, scope, args.review)
+    missing = [a for a, v in rec["bound"].items() if v is None]
+    if missing:
+        raise SdlcError(f"승인 대상 없음: {missing}")
+    vr = approvals.verify(root, ch.id, rec)
+    rec["approver"] = vr.actor
+    if vr.status == approvals.INVALID:
+        print(f"거부: {vr.reason}", file=sys.stderr)
+        return 1
+    ch.state.setdefault("approvals", {})[scope] = rec
+    ch.record("approval", scope=scope, kind="github_review", ref=args.review, approver=vr.actor, verify=vr.status)
+    ch.save()
+    print(f"기록: {scope} ← {args.review} ({vr.status} {vr.level}: {vr.reason})")
+    return 0 if vr.status == approvals.VERIFIED else 3
+
+
 def cmd_gate(args):
     ch = project(args).load(args.change_id)
     res = g.gate(ch, args.stage)
@@ -209,7 +233,25 @@ def bugs_open(ch) -> bool:
 
 
 def cmd_bug(args):
+    from core import bugtracker, github
+    if args.bug_cmd == "board":
+        p = project(args)
+        text = bugtracker.board(p)
+        print(text if not args.json else json.dumps({"path": str(p.sdlc_dir / "BUGS.md")}))
+        return 0
     ch = project(args).load(args.change_id)
+    if args.bug_cmd == "sync":
+        try:
+            events = bugtracker.sync(ch, dry_run=args.dry_run)
+        except github.GhUnavailable as e:
+            print(f"GitHub 동기화 불가: {e}", file=sys.stderr)
+            return 3
+        out(args, events, "\n".join(events) or "동기화할 BUG 없음")
+        return 0
+    if args.bug_cmd == "comment":
+        b = bugs.get(ch, args.bug_id)
+        print(bugtracker.comment(ch, b, args.role, args.body))
+        return 0
     if args.bug_cmd == "list":
         rows = [{"id": b.id, **b.meta} for b in bugs.load_all(ch)]
         out(args, rows, "\n".join(f"{r['id']}  {r.get('status'):<16} {r.get('severity'):<8} "
@@ -346,6 +388,10 @@ def build_parser() -> argparse.ArgumentParser:
     sp = add("approve", cmd_approve, "로컬 TTY 승인 기록 (E1 — high-risk/release 불인정)", json_=False)
     sp.add_argument("change_id")
     sp.add_argument("scope", choices=list(sm.APPROVAL_SCOPES))
+    sp = add("approve-github", cmd_approve_github, "GitHub PR 리뷰를 승인 원본으로 등록 (E2, API 로 검증)", json_=False)
+    sp.add_argument("change_id")
+    sp.add_argument("scope", choices=list(sm.APPROVAL_SCOPES))
+    sp.add_argument("--review", required=True, help="PR 리뷰 URL (…/pull/N#pullrequestreview-ID)")
     sp = add("gate", cmd_gate, "단계 전이 판정 (ALLOW 시 적용)")
     sp.add_argument("change_id")
     sp.add_argument("stage", choices=sm.STAGES)
@@ -374,11 +420,22 @@ def build_parser() -> argparse.ArgumentParser:
 
     sp = sub.add_parser("bug", help="결함 티켓")
     bsub = sp.add_subparsers(dest="bug_cmd", required=True)
-    for name in ("list", "new", "transition", "classify"):
-        b = bsub.add_parser(name)
+    bug_help = {"list": "BUG 목록", "new": "수동 BUG 발행", "transition": "상태 전이 (역할 규칙 적용)",
+                "classify": "defect/flaky/infra/oracle 분류", "sync": "BUG ↔ GitHub Issue 동기화 (댓글 주고받기)",
+                "comment": "QC·Builder 대화 남기기 (로컬 Discussion + Issue 댓글)", "board": "전체 버그 보드 .sdlc/BUGS.md"}
+    for name in ("list", "new", "transition", "classify", "sync", "comment", "board"):
+        b = bsub.add_parser(name, help=bug_help[name])
         b.set_defaults(fn=cmd_bug)
         b.add_argument("--json", action="store_true")
+        if name == "board":
+            continue
         b.add_argument("change_id")
+        if name == "sync":
+            b.add_argument("--dry-run", action="store_true")
+        if name == "comment":
+            b.add_argument("bug_id")
+            b.add_argument("--role", required=True, choices=["builder", "qc-verifier", "qc-architect", "human"])
+            b.add_argument("--body", required=True)
         if name in ("transition", "classify"):
             b.add_argument("bug_id")
             b.add_argument("--role", required=True, choices=["builder", "qc-verifier", "qc-architect", "human"])

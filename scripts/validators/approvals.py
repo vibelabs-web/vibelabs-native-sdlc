@@ -3,7 +3,8 @@
 - 승인은 state.json 의 approvals[scope] 레코드로만 들어오며, 문서의 status/approval_ref 문자열은 보지 않는다.
 - 검증기가 진위를 확인하지 못하면 UNVERIFIABLE → 게이트는 MANUAL_VERIFICATION_REQUIRED (fail-closed).
 - local_attested: 로컬 TTY 에서 사람이 확인한 승인. 프로젝트 밖 키로 HMAC 서명. 증거 등급 E1.
-- github_review: 인터페이스만. 오프라인 MVP 에서는 항상 UNVERIFIABLE.
+- github_review: GitHub PR 리뷰를 API 로 확인 (APPROVED · 작성자≠리뷰어 · 쓰기 권한 · 정책 명단 ·
+  리뷰한 커밋의 파일 내용 = 승인 대상 SHA). 증거 등급 E2. 네트워크·gh 불가 시 UNVERIFIABLE.
 """
 from __future__ import annotations
 
@@ -28,6 +29,7 @@ class VerifyResult:
     status: str
     level: str
     reason: str
+    actor: str | None = None
 
 
 def key_path() -> Path:
@@ -84,12 +86,81 @@ class LocalAttestedVerifier(ApprovalVerifier):
 
 
 class GitHubReviewVerifier(ApprovalVerifier):
-    """M2 연동 지점. PR 리뷰 ID·승인자 권한·커밋 일치를 GitHub API 로 확인해야 한다 — 미구현."""
+    """PR 리뷰 승인 검증 (M2). record: {ref: 리뷰 URL, bound: {artifact: sha, commit?}, paths: {artifact: repo 경로}}."""
     kind = "github_review"
+    WRITE_PERMS = {"admin", "maintain", "write"}
 
     def verify(self, project_root, change_id, record):
-        return VerifyResult(UNVERIFIABLE, "E0",
-                            f"외부 승인 원본 {record.get('ref')} 를 검증할 신뢰 서비스가 연결되지 않음 (미구현)")
+        from core import github, policy
+        parsed = github.parse_review_url(record.get("ref", ""))
+        if not parsed:
+            return VerifyResult(INVALID, "E0", f"리뷰 URL 형식 아님: {record.get('ref')!r}")
+        owner, repo, pr, review_id = parsed
+        expected = github.repo_slug(project_root)
+        if expected and f"{owner}/{repo}".lower() != expected.lower():
+            return VerifyResult(INVALID, "E0", f"리뷰 레포 {owner}/{repo} ≠ 이 프로젝트 {expected}")
+        base = f"repos/{owner}/{repo}"
+        gh = github.client()
+        try:
+            review = gh.api(f"{base}/pulls/{pr}/reviews/{review_id}")
+            pull = gh.api(f"{base}/pulls/{pr}")
+            reviewer = (review.get("user") or {}).get("login", "")
+            if review.get("state") != "APPROVED":
+                return VerifyResult(INVALID, "E0", f"리뷰 상태 {review.get('state')} — APPROVED 아님", reviewer)
+            author = (pull.get("user") or {}).get("login", "")
+            if reviewer.lower() == author.lower():
+                return VerifyResult(INVALID, "E0", f"PR 작성자 {author} 의 자기 승인", reviewer)
+            perm = gh.api(f"{base}/collaborators/{reviewer}/permission").get("permission")
+            if perm not in self.WRITE_PERMS:
+                return VerifyResult(INVALID, "E0", f"{reviewer} 권한 {perm} — 승인 권한 없음", reviewer)
+            allowed = policy.allowed_reviewers(project_root, record.get("scope", ""))
+            if allowed is not None and reviewer.lower() not in allowed:
+                return VerifyResult(INVALID, "E0",
+                                    f"{reviewer} 는 정책상 {record.get('scope')} 승인자 아님 ({policy.POLICY_REL})", reviewer)
+            commit = review.get("commit_id")
+            bound = record.get("bound") or {}
+            if "commit" in bound and bound["commit"] != commit:
+                return VerifyResult(INVALID, "E0", f"리뷰 커밋 {str(commit)[:12]} ≠ 승인 대상 커밋 "
+                                                   f"{str(bound['commit'])[:12]}", reviewer)
+            for art, sha in bound.items():
+                if art in ("commit", "qc_run"):
+                    continue
+                path = (record.get("paths") or {}).get(art)
+                if not path or not path.startswith(f".sdlc/changes/{change_id}/"):
+                    return VerifyResult(INVALID, "E0", f"{art} 경로가 변경 폴더 밖이거나 없음: {path!r}", reviewer)
+                remote = _remote_sha(gh, base, commit, path, art)
+                if remote != sha:
+                    return VerifyResult(INVALID, "E0", f"리뷰한 커밋의 {path} 내용 ≠ 승인 대상 — 리뷰 이후 바뀐 내용", reviewer)
+        except github.GhUnavailable as e:
+            return VerifyResult(UNVERIFIABLE, "E0", f"GitHub 확인 불가: {e}")
+        except github.GhError as e:
+            if e.status == 404:
+                return VerifyResult(INVALID, "E0", f"리뷰/PR 를 찾을 수 없음: {record.get('ref')}")
+            return VerifyResult(UNVERIFIABLE, "E0", str(e))
+        return VerifyResult(VERIFIED, "E2", f"GitHub PR #{pr} 리뷰 승인 ({reviewer}, {review.get('submitted_at')})",
+                            reviewer)
+
+
+def _remote_sha(gh, base: str, commit: str, path: str, art: str) -> str | None:
+    from core import github
+    from core.hashing import sha256_bytes
+    if art != "qc_tests":
+        try:
+            return gh.api(f"{base}/contents/{path}?ref={commit}").get("sha")
+        except github.GhError as e:
+            if e.status == 404:
+                return None
+            raise
+    tree = gh.api(f"{base}/git/trees/{commit}?recursive=1")
+    prefix = path.rstrip("/") + "/"
+    rows = []
+    for t in tree.get("tree", []):
+        p = t.get("path", "")
+        if t.get("type") == "blob" and p.startswith(prefix) and "__pycache__" not in p.split("/"):
+            rows.append((tuple(p[len(prefix):].split("/")), t["sha"]))
+    if not rows:
+        return None
+    return sha256_bytes("\n".join(f"{'/'.join(r)}:{sha}" for r, sha in sorted(rows)).encode())
 
 
 REGISTRY: dict[str, ApprovalVerifier] = {v.kind: v for v in (LocalAttestedVerifier(), GitHubReviewVerifier())}

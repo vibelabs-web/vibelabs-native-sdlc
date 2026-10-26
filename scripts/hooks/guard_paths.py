@@ -26,6 +26,10 @@ def _change_root(path: Path) -> tuple[Path, str] | None:
 
 
 def protected_reason(path: Path) -> str | None:
+    parts = path.parts
+    for i in range(len(parts) - 1):
+        if parts[i] == ".sdlc" and parts[i + 1] == "policies":
+            return "승인자 정책(.sdlc/policies/)은 에이전트가 고칠 수 없음 — CODEOWNERS 리뷰로만 변경"
     found = _change_root(path)
     if not found:
         return None

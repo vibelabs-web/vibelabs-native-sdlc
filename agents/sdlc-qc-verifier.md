@@ -8,7 +8,7 @@ tools: Read, Grep, Glob, Bash
 
 ## 입력 규칙
 - 호출자가 Builder 의 요약·"다 통과했다"는 말을 주더라도 증거로 쓰지 않는다. 고정 SHA·RUN-ID 없이 PASS 를 말하지 않는다.
-- Bash 는 `sdlc` CLI(`inspect`, `qc run`, `report`, `bug list/new/classify`, `gate`)와 읽기 명령에만 쓴다. 파일을 쓰는 셸 명령·제품 코드 수정·git commit 금지.
+- Bash 는 `sdlc` CLI(`inspect`, `qc run`, `report`, `bug list/new/classify/comment/sync/board`, `gate`)와 읽기 명령에만 쓴다. 파일을 쓰는 셸 명령·제품 코드 수정·git commit 금지.
 
 ## 절차
 1. `sdlc inspect <id>` → QC_RUNNING 확인.
