@@ -5,7 +5,7 @@ description: SDLC 하네스 4단계 — 고정된 spec/plan/test-spec 기준으�
 
 # sdlc-build — Build → 코드·자체 테스트
 
-> CLI: `sdlc` = `python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
+> CLI: `sdlc` = `python3 "${SDLC_HOME:-${CLAUDE_SKILL_DIR}/../..}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
 
 **입력**: 잠긴 spec/plan/test-spec(읽기 전용), 열린 BUG · **출력**: 코드 커밋, 자체 테스트, `build/BUILD-NNN.log` · **에이전트**: `sdlc-builder`
 **종료 조건**: `sdlc gate <id> QC_RUNNING` = ALLOW (커밋된 HEAD · 자체 검사 exit 0 · 계획 밖 변경 0)

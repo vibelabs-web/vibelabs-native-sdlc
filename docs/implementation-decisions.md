@@ -38,3 +38,4 @@
 | D34 | 계획 드리프트는 빌드 시작 이후 **이 브랜치가 직접 만든 비머지 커밋**(origin 기본 브랜치에 없는 것)이 바꾼 파일만 본다 | — | PR #4 e2e 에서 발견: main 을 합친 뒤 main 쪽 파일이 계획 밖 변경으로 잡혀 QC_RUNNING 이 막힘. 브랜치 안에서 만들었다 되돌린 파일은 보수적으로 계속 센다 |
 | D35 | "같은 코드" 판정: 증거·빌드 검사·release 승인의 커밋이 HEAD 의 조상이고 그 사이 변경이 `.sdlc/` 뿐이면 동일 커밋으로 본다 | §7 `evidence.commit_sha == current_commit_sha` | PR #4 e2e 에서 발견: 자율 모드는 상태·증거를 커밋해 PR 에 올려야 하는데, 그 커밋이 증거를 무효로 만들어 끝나지 않음. `.sdlc/` 무결성은 기준선·잠금·report 해시가 담당 |
 | D36 | CI 의 base 브랜치는 `github.event.pull_request.base.ref` 로 받는다 | — | PR #4 e2e 에서 발견: 봇 리뷰가 일으킨 `pull_request_review` 실행에서 `github.base_ref` 가 비어 QC 자산 검사가 깨짐 → 최신 체크 실패로 릴리스 BLOCK |
+| D37 | Claude Code 플러그인으로 배포: 레포 루트가 플러그인이자 마켓플레이스(`.claude-plugin/`, `source: "./"`). 진입 스킬은 `skills/sdlc/SKILL.md` 로 이동 | 설계서 §2 `skills/sdlc/SKILL.md` (원래 설계와 일치하게 됨) | 다른 사람이 `/plugin install` 로 설치. 스킬은 `${CLAUDE_SKILL_DIR}/../..` 로 CLI 를 찾아 플러그인 캐시·심링크 설치 모두에서 동작(심링크 모드 치환은 실측 확인). 플러그인 설치 시 이름에 `vibelabs-sdlc:` 접두사 |

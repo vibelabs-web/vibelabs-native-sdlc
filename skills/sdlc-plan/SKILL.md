@@ -5,7 +5,7 @@ description: SDLC 하네스 3단계(Planner 트랙) — 승인된 spec 으로 TA
 
 # sdlc-plan — Plan 트랙
 
-> CLI: `sdlc` = `python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
+> CLI: `sdlc` = `python3 "${SDLC_HOME:-${CLAUDE_SKILL_DIR}/../..}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
 
 **입력**: 승인된 `spec.md` 만 (test-spec 초안을 보지 않는다) · **출력**: `plan.md` · **에이전트**: `sdlc-planner`
 **종료 조건**: `sdlc validate <id>` 에 plan.md 관련 error 0, 모든 must REQ 에 TASK 연결

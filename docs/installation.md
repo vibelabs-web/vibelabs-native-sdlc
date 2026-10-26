@@ -5,27 +5,43 @@
 - Python 3.10+ (표준 라이브러리만 사용 — `pip install` 불필요), git 2.x
 - Claude Code (스킬·에이전트 사용 시)
 
-## 1. 스킬·에이전트 등록
+## 1. 플러그인으로 설치 (권장 · 다른 사람도 동일)
+
+Claude Code 세션에서:
+
+```
+/plugin marketplace add vibelabs-web/vibelabs-native-sdlc
+/plugin install vibelabs-sdlc@vibelabs-sdlc
+```
+
+셸에서는 `claude plugin marketplace add vibelabs-web/vibelabs-native-sdlc` → `claude plugin install vibelabs-sdlc@vibelabs-sdlc` (`--scope project` 로 프로젝트에만).
+업데이트: `/plugin marketplace update vibelabs-sdlc`. 설치 후 진입은 `/vibelabs-sdlc:sdlc`, 에이전트 이름은 `vibelabs-sdlc:sdlc-builder` 처럼 접두사가 붙는다.
+
+- 지원: Claude Code CLI·데스크톱·IDE. **claude.ai/code 클라우드 세션은 로컬에서 설치한 플러그인을 로드하지 않는다**(조직 managed settings 배포만 예외). claude.ai 채팅에 zip 업로드는 스킬만 로드하고 에이전트를 무시하며 git·python 실행 환경이 없어 **미지원**.
+
+## 1-1. 개발용: 레포 심링크 (이 레포를 고치는 사람)
 
 ```bash
 cd /path/to/vibelabs-native-sdlc
 ./install.sh --check     # 현재 상태 (변경 없음)
-./install.sh             # ~/.claude/skills/sdlc, sdlc-* 와 ~/.claude/agents/sdlc-*.md 심링크
+./install.sh             # ~/.claude/skills/sdlc* 와 ~/.claude/agents/sdlc-*.md 심링크
 ./install.sh --remove    # 이 레포를 가리키는 심링크만 제거
 ```
 
 - 기존 파일이나 다른 곳을 가리키는 심링크가 있으면 **덮어쓰지 않고 건너뛴다**(exit 1).
-- 설치 위치 변경: `CLAUDE_SKILLS_DIR`, `CLAUDE_AGENTS_DIR`.
+- 설치 위치 변경: `CLAUDE_SKILLS_DIR`, `CLAUDE_AGENTS_DIR`. 플러그인과 동시에 쓰면 같은 스킬이 두 벌 보이므로 하나만 쓴다.
 - `~/.claude/settings.json` 은 수정하지 않는다.
 
 ## 2. CLI
 
+스킬은 `${CLAUDE_SKILL_DIR}/../..` (스킬 폴더 기준 하네스 루트)로 CLI 를 찾는다. 다른 위치의 하네스를 쓰려면 `SDLC_HOME`.
+
 ```bash
-python3 ~/.claude/skills/sdlc/scripts/sdlc.py --help
-# 편의 함수
-sdlc() { python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py" "$@"; }
+python3 <하네스 루트>/scripts/sdlc.py --help
+sdlc() { python3 "${SDLC_HOME:-<하네스 루트>}/scripts/sdlc.py" "$@"; }
 ```
 
+`<하네스 루트>` = 이 레포 경로, 또는 플러그인 캐시(`~/.claude/plugins/cache/…/vibelabs-sdlc/<버전>`).
 대상 프로젝트 루트(또는 그 하위)에서 실행하면 `.sdlc/` 또는 `.git` 을 찾아 루트를 정한다. 다른 위치에서는 `--root`.
 
 ## 3. 승인 키
@@ -43,7 +59,7 @@ sdlc() { python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py" "$@";
       {
         "matcher": "Edit|Write|MultiEdit|NotebookEdit|Bash",
         "hooks": [
-          {"type": "command", "command": "python3 ~/.claude/skills/sdlc/scripts/hooks/guard_paths.py"}
+          {"type": "command", "command": "python3 <하네스 루트>/scripts/hooks/guard_paths.py"}
         ]
       }
     ]

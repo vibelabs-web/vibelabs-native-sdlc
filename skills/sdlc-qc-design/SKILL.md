@@ -5,7 +5,7 @@ description: SDLC 하네스 3단계(QC Architect 트랙) — 구현 코드를 �
 
 # sdlc-qc-design — 독립 Test Spec 트랙
 
-> CLI: `sdlc` = `python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
+> CLI: `sdlc` = `python3 "${SDLC_HOME:-${CLAUDE_SKILL_DIR}/../..}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
 
 **입력**: 승인된 `spec.md` 만 (plan.md·구현 코드 금지) · **출력**: `test-spec.md`, `qc-manifest.json`, `qc-tests/` · **에이전트**: `sdlc-qc-architect`
 **종료 조건**: 모든 must REQ 에 TC, 모든 must TC 에 qc-manifest 명령, skip 표식 0

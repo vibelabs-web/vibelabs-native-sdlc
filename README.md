@@ -13,7 +13,7 @@
 5. `docs/05_평가_검증_시나리오.md` — 시스템 자체 인수 테스트와 회귀 평가 설계
 6. `templates/` — 모든 단계의 마크다운 산출물 템플릿
 7. `examples/event-registration/` — 행사 신청 예시 산출물(일부)
-8. `SKILL.md`(/sdlc 진입) · `skills/sdlc-*` · `agents/sdlc-*` — 구현된 스킬·에이전트 (아래 '구현 현황')
+8. `skills/sdlc/SKILL.md`(/sdlc 진입) · `skills/sdlc-*` · `agents/sdlc-*` — 구현된 스킬·에이전트 (아래 '구현 현황')
 9. `docs/demo-walkthrough.md` — 빈 디렉터리에서 10~15분 데모
 
 ## 핵심 정의
@@ -59,7 +59,7 @@ flowchart TD
 |---|---|---|
 | Phase 0 리포지터리 감사 | 완료 | `docs/repository-audit.md` |
 | Phase 1 CLI·오프라인 검증기 (스키마·ID·추적성·기준선·승인 인터페이스·경로) | 구현·테스트 | `scripts/sdlc.py`, `scripts/validators/`, `schemas/` |
-| Phase 2 진입 스킬 + 단계 스킬 8 + 에이전트 6 | 구현 (에이전트 행동은 EVAL-001/002/007/014 수동 평가 — **미검증**) | `SKILL.md`, `skills/`, `agents/` |
+| Phase 2 진입 스킬 + 단계 스킬 8 + 에이전트 6 | 구현 (에이전트 행동은 EVAL-001/002/007/014 수동 평가 — **미검증**) | `skills/`, `agents/`, `.claude-plugin/` |
 | Phase 3 QC 실행·RUN 증거·BUG 루프·재시도 예산·릴리스 체크리스트 | 구현·테스트 | `scripts/core/runner.py`, `bugs.py`, `release.py` |
 | Phase 4 오라클 잠금·skip 탐지·가드 훅·CI 예시·evals | 구현·테스트 (보호 브랜치·CODEOWNERS 적용은 **미적용**, 권장안만) | `scripts/validators/tamper.py`, `scripts/hooks/`, `.github/workflows/`, `evals/` |
 | M2 GitHub PR 리뷰 승인 검증(E2)·CI 체크·고위험 security 승인 | 구현·테스트 (가짜 API + 실제 레포 읽기 확인) | `scripts/validators/approvals.py`, `scripts/core/github.py`, `docs/github-integration.md` |
@@ -67,8 +67,17 @@ flowchart TD
 | M2 버그 소통: GitHub Issue 동기화·댓글·보드 | 구현·테스트 (실제 레포에서 Issue 생성·댓글 확인) | `scripts/core/bugtracker.py` |
 | 자동 배포·롤백 | 범위 밖 (명령 없음) | — |
 
+### 설치 (Claude Code 플러그인)
+
+```
+/plugin marketplace add vibelabs-web/vibelabs-native-sdlc
+/plugin install vibelabs-sdlc@vibelabs-sdlc
+```
+
+설치 후 `/vibelabs-sdlc:sdlc` 로 시작한다. 요구 사항: Python 3.10+, git. 개발용 심링크 설치·CLI 는 아래.
+
 ```bash
-./install.sh                                  # ~/.claude 에 심링크 (기존 항목 덮어쓰지 않음)
+./install.sh                                  # 개발용: ~/.claude 에 심링크 (기존 항목 덮어쓰지 않음)
 python3 scripts/sdlc.py --help
 python3 -m unittest discover -s tests         # 하네스 테스트
 python3 scripts/sdlc.py eval                  # EVAL-001~016

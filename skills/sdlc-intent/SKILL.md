@@ -5,7 +5,7 @@ description: SDLC 하네스 1단계 — 자연어 요청을 인터뷰해 .sdlc/c
 
 # sdlc-intent — Discover → intent.md
 
-> CLI: `sdlc` = `python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
+> CLI: `sdlc` = `python3 "${SDLC_HOME:-${CLAUDE_SKILL_DIR}/../..}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
 
 **입력**: 사용자 요청, 기존 코드·이슈·메모·정책 (먼저 조사) · **출력**: `intent.md` · **에이전트**: `sdlc-planner`
 **종료 조건**: `sdlc gate <id> INTENT_APPROVED --dry-run` 의 BLOCK 사유 0 (MANUAL 은 승인 대기 — 사람에게 넘김)

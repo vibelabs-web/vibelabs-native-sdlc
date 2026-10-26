@@ -5,7 +5,7 @@ description: SDLC 하네스 6단계 — QC_PASSED 이후 review.md·release.md �
 
 # sdlc-release — PR Review & Release 체크리스트
 
-> CLI: `sdlc` = `python3 "${SDLC_HOME:-$HOME/.claude/skills/sdlc}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
+> CLI: `sdlc` = `python3 "${SDLC_HOME:-${CLAUDE_SKILL_DIR}/../..}/scripts/sdlc.py"` — 대상 프로젝트 루트에서 실행. 공통 규칙은 `/sdlc` 진입 스킬 §3.
 
 **입력**: qc-report, 전체 diff, plan·승인 기록 · **출력**: `review.md`, `release.md` (초안) · **에이전트**: `sdlc-release-auditor`
 **종료 조건**: 체크리스트 작성 + 사람에게 승인 경로 안내
