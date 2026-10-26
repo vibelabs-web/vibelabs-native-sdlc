@@ -103,6 +103,13 @@ PR 이 `test-spec.md`·`qc-manifest.json`·`qc-tests/` 를 바꾸면 `scripts/ci
 정책을 base 에서 읽으므로 **정책 파일은 QC 자산과 다른 PR 로 먼저 main 에 들어가 있어야 한다** (PR 이 스스로 넣은 정책으로 자기 승인 불가).
 봇 리뷰가 제출되면 `pull_request_review` 이벤트로 CI 가 다시 돌고, 게이트는 같은 커밋의 **가장 최근** 체크 결과를 본다.
 
+### 실제 검증 기록 (2026-10-26, PR #4 — 닫음)
+
+`vibelabs-sdlc-gatekeeper[bot]` 이 intent·spec·plan_test·release 를 승인(모두 E2 검증)했고, CHG-DEMO-001 이
+INTENT_DRAFT → RELEASE_APPROVED 를 사람 승인 없이 통과했다. 그 과정에서 발견·수정한 결함:
+라벨 의존 CI(#5), main 머지분을 계획 밖으로 세던 drift(#6), `.sdlc` 커밋이 증거를 무효로 만들던 문제(#7),
+리뷰 이벤트 CI 의 빈 base ref(#8). 코드가 바뀐 뒤에는 이전 release 승인·QC 증거가 무효로 잡히는 것도 확인했다.
+
 ### 이 모드에서 사라지는 것 / 남는 것
 
 - 사라짐: 사람의 판단. "승인"은 결정적 규칙(추적성·오라클 잠금·증거·CI)이 모두 통과했다는 기록이 된다.
