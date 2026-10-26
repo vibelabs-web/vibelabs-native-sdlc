@@ -199,3 +199,20 @@ class DriftUpstreamMergeTest(SandboxCase):
         self.sb.commit("out of plan on branch")
         issues, out = drift.check(self.sb.reload(ch), check.validate(self.sb.reload(ch)).parsed["plan"])
         self.assertEqual(out, ["app/extra.py"])
+
+
+class SdlcOnlyCommitTest(SandboxCase):
+    """회귀: `.sdlc/` 만 바꾼 커밋은 증거를 무효로 만들지 않고, 제품 코드 커밋은 여전히 무효로 만든다."""
+
+    def test_state_commit_keeps_evidence_code_commit_breaks_it(self):
+        ch = self.sb.demo()
+        ch, _ = fx.advance(self.sb, ch)
+        runner.run(ch)
+        self.sb.commit("record sdlc state and evidence")
+        res = g.gate(self.sb.reload(ch), "QC_PASSED")
+        self.assertEqual(res.decision, g.ALLOW, res.to_dict())
+        (self.sb.root / "app" / "registration.py").write_text(
+            (self.sb.root / "app" / "registration.py").read_text() + "\n# code change\n")
+        self.sb.commit("code change")
+        res = g.gate(self.sb.reload(ch), "QC_PASSED")
+        self.assertIn("STALE_EVIDENCE_SHA", self.codes(res.reasons))
