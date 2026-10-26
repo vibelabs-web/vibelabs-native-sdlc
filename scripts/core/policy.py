@@ -36,3 +36,8 @@ def allowed_reviewers(root: Path, scope: str) -> list[str] | None:
 def required_checks(root: Path) -> list[str]:
     pol = load(root)
     return list((pol or {}).get("required_checks", DEFAULT_REQUIRED_CHECKS))
+
+
+def distinct_security_reviewer(root: Path) -> bool:
+    """high-risk 의 security 승인자가 plan_test 승인자와 달라야 하는지 (기본 True, 완전 자율 정책은 False)."""
+    return bool((load(root) or {}).get("require_distinct_security_reviewer", True))

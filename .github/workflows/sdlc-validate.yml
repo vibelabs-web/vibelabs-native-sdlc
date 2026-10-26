@@ -5,11 +5,14 @@ name: sdlc-validate
 on:
   pull_request:
     types: [opened, synchronize, reopened, labeled, unlabeled]
+  pull_request_review:
+    types: [submitted, dismissed]
   push:
     branches: [main]
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
   validate:
@@ -29,11 +32,13 @@ jobs:
       - name: Validate every change (schema · ID · traceability · baseline drift · oracle lock · skip)
         run: |
           if [ -d .sdlc/changes ]; then python scripts/sdlc.py ci; else echo "no .sdlc/changes"; fi
-      # QA 책임자가 검토 후 'qc-oracle-approved' 라벨을 붙여야 통과. 라벨 권한(triage+)과 CODEOWNERS 를 함께 설정할 것.
-      - name: Protected QC assets changed in this PR → review required
-        if: github.event_name == 'pull_request' && !contains(github.event.pull_request.labels.*.name, 'qc-oracle-approved')
-        run: |
-          changed=$(git diff --name-only "origin/${{ github.base_ref }}...HEAD" -- '.sdlc/changes/*/test-spec.md' '.sdlc/changes/*/qc-manifest.json' '.sdlc/changes/*/qc-tests/**' '.sdlc/changes/*/state.json' || true)
-          if [ -n "$changed" ]; then
-            echo "::error::QC 오라클/상태 파일 변경 — QA/PO 리뷰(CODEOWNERS) 필요:"; echo "$changed"; exit 1
-          fi
+      # 잠긴 QC 자산 변경: 사람 QA 라벨 또는 base 정책에 등록된 승인자(봇 포함)의 유효한 APPROVED 리뷰 필요
+      - name: Protected QC assets changed in this PR → approval required
+        if: startsWith(github.event_name, 'pull_request')
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          LABELS: ${{ toJson(github.event.pull_request.labels.*.name) }}
+          GH_TOKEN: ${{ github.token }}
+        run: python scripts/ci/check_qc_assets.py

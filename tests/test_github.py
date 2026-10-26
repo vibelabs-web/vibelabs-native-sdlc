@@ -159,6 +159,11 @@ class ReleaseCiTest(GhCase):
         self.checks({"name": "validate", "status": "completed", "conclusion": "failure"})
         self.assertIn("CI_CHECK_FAILED", self.codes(g.gate(self.sb.reload(self.ch), "RELEASE_APPROVED").reasons))
 
+    def test_latest_ci_run_wins(self):
+        self.checks({"id": 1, "name": "validate", "status": "completed", "conclusion": "failure"},
+                    {"id": 2, "name": "validate", "status": "completed", "conclusion": "success"})
+        self.assertEqual(g.gate(self.sb.reload(self.ch), "RELEASE_APPROVED").decision, g.ALLOW)
+
     def test_ci_missing_or_running_is_manual(self):
         self.checks()
         self.assertEqual(g.gate(self.sb.reload(self.ch), "RELEASE_APPROVED").decision, g.MANUAL)

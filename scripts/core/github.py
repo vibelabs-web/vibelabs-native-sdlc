@@ -23,6 +23,9 @@ class GhUnavailable(GhError):
 
 
 class GhClient:
+    def __init__(self, token: str | None = None):
+        self.token = token  # None = 사용자 gh 로그인, 값 = GitHub App 설치 토큰 등
+
     def api(self, path: str, method: str = "GET", body: dict | None = None):
         if os.environ.get("SDLC_GITHUB_OFFLINE") == "1":
             raise GhUnavailable("SDLC_GITHUB_OFFLINE=1")
@@ -30,8 +33,9 @@ class GhClient:
         if body is not None:
             cmd += ["--input", "-"]
         try:
+            env = {**os.environ, "GH_TOKEN": self.token} if self.token else None
             p = subprocess.run(cmd, input=json.dumps(body) if body is not None else None,
-                               capture_output=True, text=True, timeout=60)
+                               capture_output=True, text=True, timeout=60, env=env)
         except FileNotFoundError as e:
             raise GhUnavailable("gh CLI 없음") from e
         except subprocess.TimeoutExpired as e:

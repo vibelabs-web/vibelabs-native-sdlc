@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "mode": "autonomous",
+  "scopes": {
+    "intent": ["<app-slug>[bot]"],
+    "spec": ["<app-slug>[bot]"],
+    "plan_test": ["<app-slug>[bot]"],
+    "security": ["<app-slug>[bot]"],
+    "release": ["<app-slug>[bot]"]
+  },
+  "require_distinct_security_reviewer": false,
+  "required_checks": ["validate"]
+}

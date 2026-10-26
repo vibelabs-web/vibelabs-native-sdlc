@@ -110,10 +110,17 @@ class GitHubReviewVerifier(ApprovalVerifier):
             author = (pull.get("user") or {}).get("login", "")
             if reviewer.lower() == author.lower():
                 return VerifyResult(INVALID, "E0", f"PR 작성자 {author} 의 자기 승인", reviewer)
-            perm = gh.api(f"{base}/collaborators/{reviewer}/permission").get("permission")
-            if perm not in self.WRITE_PERMS:
-                return VerifyResult(INVALID, "E0", f"{reviewer} 권한 {perm} — 승인 권한 없음", reviewer)
             allowed = policy.allowed_reviewers(project_root, record.get("scope", ""))
+            is_bot = (review.get("user") or {}).get("type") == "Bot" or reviewer.endswith("[bot]")
+            if is_bot:
+                # 봇(GitHub App) 승인은 정책 명단에 그 봇이 명시된 스코프에서만 인정한다
+                if allowed is None or reviewer.lower() not in allowed:
+                    return VerifyResult(INVALID, "E0", f"봇 {reviewer} 은 {policy.POLICY_REL} 의 "
+                                                       f"{record.get('scope')} 명단에 없음 — 봇 승인 불인정", reviewer)
+            else:
+                perm = gh.api(f"{base}/collaborators/{reviewer}/permission").get("permission")
+                if perm not in self.WRITE_PERMS:
+                    return VerifyResult(INVALID, "E0", f"{reviewer} 권한 {perm} — 승인 권한 없음", reviewer)
             if allowed is not None and reviewer.lower() not in allowed:
                 return VerifyResult(INVALID, "E0",
                                     f"{reviewer} 는 정책상 {record.get('scope')} 승인자 아님 ({policy.POLICY_REL})", reviewer)

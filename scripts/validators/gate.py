@@ -142,7 +142,7 @@ def _verify_security(change, res: GateResult, primary: str | None) -> None:
         res.manual.append(f"security: high-risk 변경은 {policy.POLICY_REL} 에 security 승인자 명단이 필요")
         return
     actor = _verify_approval(change, "security", res)
-    if actor and primary and actor.lower() == primary.lower():
+    if actor and primary and actor.lower() == primary.lower() and policy.distinct_security_reviewer(change.project.root):
         res.block(err("SECURITY_SAME_REVIEWER", f"security 승인자 {actor} 가 plan_test 승인자와 같음 — 독립 승인 필요"))
 
 
@@ -163,7 +163,8 @@ def _verify_ci(change, head: str | None, res: GateResult) -> None:
         return
     runs = data.get("check_runs", []) if isinstance(data, dict) else []
     for name in policy.required_checks(change.project.root):
-        mine = [r for r in runs if r.get("name") == name]
+        # 같은 커밋에 여러 번 돈 경우(리뷰 이벤트 재실행 등) 가장 최근 실행만 본다
+        mine = sorted((r for r in runs if r.get("name") == name), key=lambda r: r.get("id", 0))[-1:]
         if not mine:
             res.manual.append(f"CI: {head[:12]} 에 필수 체크 '{name}' 실행 기록 없음")
         elif any(r.get("status") != "completed" for r in mine):

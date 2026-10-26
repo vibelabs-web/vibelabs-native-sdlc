@@ -185,6 +185,49 @@ def cmd_approve_github(args):
     return 0 if vr.status == approvals.VERIFIED else 3
 
 
+def cmd_auto_approve(args):
+    from core import autoapprove
+    ch = project(args).load(args.change_id)
+    try:
+        r = autoapprove.auto_approve(ch, args.scope, args.pr)
+    except autoapprove.Refused as e:
+        print(f"승인 거부: {e}", file=sys.stderr)
+        return 3 if e.manual else 1
+    print(f"승인: {r['scope']} ← {r['review']} ({r['approver']}, {r['level']})")
+    return 0
+
+
+def cmd_github_app(args):
+    from core import github, github_app, policy
+    p = project(args)
+    slug = github.repo_slug(p.root)
+    if args.app_cmd == "setup":
+        if not slug:
+            raise SdlcError("GitHub 원격(origin) 없음")
+        cfg = github_app.setup(slug, name=args.name, open_browser=not args.no_browser)
+        print(f"App 생성: {cfg['slug']} (id {cfg['app_id']}) — 설정 {github_app.config_path()}\n"
+              f"다음: 레포에 설치 → https://github.com/apps/{cfg['slug']}/installations/new\n"
+              f"그 뒤 .sdlc/policies/approvers.json 각 스코프에 \"{github_app.bot_login(cfg)}\" 를 넣으세요.")
+        return 0
+    cfg = github_app.load_config()
+    if not cfg:
+        print("GitHub App 미설정 — `sdlc github-app setup`")
+        return 1
+    bot = github_app.bot_login(cfg)
+    print(f"App: {cfg['slug']} (id {cfg['app_id']}) · 봇 신원: {bot}")
+    try:
+        github_app.installation_token(slug, cfg)
+        print(f"설치: {slug} ✓ (설치 토큰 발급 성공)")
+    except (SdlcError, github.GhError) as e:
+        print(f"설치: ✗ {e}")
+        return 1
+    for scope in sm.APPROVAL_SCOPES:
+        allowed = policy.allowed_reviewers(p.root, scope)
+        mark = "✓" if allowed and bot.lower() in allowed else "✗"
+        print(f"  정책 {scope}: {mark} {allowed}")
+    return 0
+
+
 def cmd_gate(args):
     ch = project(args).load(args.change_id)
     res = g.gate(ch, args.stage)
@@ -392,6 +435,18 @@ def build_parser() -> argparse.ArgumentParser:
     sp.add_argument("change_id")
     sp.add_argument("scope", choices=list(sm.APPROVAL_SCOPES))
     sp.add_argument("--review", required=True, help="PR 리뷰 URL (…/pull/N#pullrequestreview-ID)")
+    sp = add("auto-approve", cmd_auto_approve, "완전 자율: 게이트 규칙 통과 시에만 봇이 PR 승인 (E2)", json_=False)
+    sp.add_argument("change_id")
+    sp.add_argument("scope", choices=list(sm.APPROVAL_SCOPES))
+    sp.add_argument("--pr", type=int, required=True)
+    sp = sub.add_parser("github-app", help="승인 전담 GitHub App(봇) 설정·상태")
+    asub = sp.add_subparsers(dest="app_cmd", required=True)
+    a = asub.add_parser("setup", help="Manifest 흐름으로 App 생성 (브라우저에서 Create 클릭)")
+    a.set_defaults(fn=cmd_github_app)
+    a.add_argument("--name")
+    a.add_argument("--no-browser", action="store_true")
+    a = asub.add_parser("status", help="설치·정책 상태")
+    a.set_defaults(fn=cmd_github_app)
     sp = add("gate", cmd_gate, "단계 전이 판정 (ALLOW 시 적용)")
     sp.add_argument("change_id")
     sp.add_argument("stage", choices=sm.STAGES)
