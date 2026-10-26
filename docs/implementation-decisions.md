@@ -43,3 +43,4 @@
 | D38 | MIT 라이선스. 배포 파일(skills·agents·scripts·schemas·templates·hooks·.claude-plugin)을 바꾼 PR 은 `plugin.json` version 상승을 CI 로 강제 | — | 플러그인은 version 이 바뀔 때만 사용자에게 업데이트된다. 문서·테스트만 바꾼 PR 은 면제 |
 | D39 | 공개 전환 후 `main` 보호: PR 필수·승인 0·필수 체크 `validate`(strict)·관리자 포함·force push 금지 | `branch-protection.md` §1 의 승인 1·코드오너 리뷰 | 1인 계정에서는 승인 1 이상이면 머지 불가. 승인 검증은 하네스 게이트가 담당 |
 | D40 | npx 설치기: `npx github:vibelabs-web/vibelabs-native-sdlc` (npm 미등록). 기본은 플러그인 명령 대행, `claude` 없으면 `~/.claude/vibelabs-sdlc` 복사 + 심링크. `package.json`·`plugin.json` version 일치를 CI 로 강제 | — | 터미널 한 줄 설치 요청. npm 이름 `vibelabs-sdlc` 는 비어 있으나 배포는 npm 계정 필요 — 필요해지면 `npm publish` 만 추가하면 `npx vibelabs-sdlc` 가 된다 |
+| D41 | npm 등록: `vibelabs-sdlc@0.4.0` (계정 futurewave). `npx vibelabs-sdlc` 로 설치 | — | 첫 배포는 7일짜리 2FA 우회 토큰으로 했고 즉시 폐기. 스테이징 자리표시 `0.0.0-stage` 가 남음 |
