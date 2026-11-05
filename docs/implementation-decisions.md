@@ -44,3 +44,9 @@
 | D39 | 공개 전환 후 `main` 보호: PR 필수·승인 0·필수 체크 `validate`(strict)·관리자 포함·force push 금지 | `branch-protection.md` §1 의 승인 1·코드오너 리뷰 | 1인 계정에서는 승인 1 이상이면 머지 불가. 승인 검증은 하네스 게이트가 담당 |
 | D40 | npx 설치기: `npx github:vibelabs-web/vibelabs-native-sdlc` (npm 미등록). 기본은 플러그인 명령 대행, `claude` 없으면 `~/.claude/vibelabs-sdlc` 복사 + 심링크. `package.json`·`plugin.json` version 일치를 CI 로 강제 | — | 터미널 한 줄 설치 요청. npm 이름 `vibelabs-sdlc` 는 비어 있으나 배포는 npm 계정 필요 — 필요해지면 `npm publish` 만 추가하면 `npx vibelabs-sdlc` 가 된다 |
 | D41 | npm 등록: `vibelabs-sdlc@0.4.0` (계정 futurewave). `npx vibelabs-sdlc` 로 설치 | — | 첫 배포는 7일짜리 2FA 우회 토큰으로 했고 즉시 폐기. 스테이징 자리표시 `0.0.0-stage` 가 남음 |
+| D42 | `--retest` RUN 은 `last_verification_run` 을 바꾸지 않고 `EVIDENCE_PARTIAL` 로 게이트에서 거부 | SOP: 관련 테스트+회귀군 재실행 | 결함 루프를 빠르게 하되 최종 SHA 의 전체 실행 원칙은 유지 |
+| D43 | `max_parallel`·`setup` 은 CLI 옵션이 아니라 잠기는 manifest 필드 | 미정 | 공유 자원 안전 여부는 테스트 작성자만 판단 가능. 실행자가 임의로 올리지 못하게 |
+| D44 | lite 는 필수 REQ 의 TC 와 미해결 BUG 의 TC 만 실행 | SOP: Lite = 린트/스모크 | 위험 등급을 QC 깊이에 반영. 등급 하향 불가 규칙은 그대로 |
+| D45 | 골든은 `qc-tests/golden/` 에 두어 기존 잠금 재사용 | 미정 | 새 디렉터리는 해시·승인·격리 복사 지점 10여 곳 수정 필요 |
+| D46 | socrates 는 선택 의존성. 조건이 맞을 때 메인 세션에서 호출, 없으면 기본 인터뷰 | 미정 | 플러그인 단독 설치에서도 동작. 호출 여부는 CLI 로 강제하지 못해 수동 eval 로 확인 |
+| D47 | `QC_TC_OVER_BUDGET`(lite 1, standard 3)·반례 탐색 예산은 차단이 아닌 경고·지침 | 미정 | 실행 기록 없이 정한 초기값 — 기록이 쌓이면 조정 |

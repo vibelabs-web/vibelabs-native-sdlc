@@ -37,7 +37,10 @@ def build(change) -> dict:
             must_verified += verdict == "PASS"
         rows.append({"req": rid, "priority": v["priority"], "must": v["must"], "tasks": v["tasks"],
                      "tcs": tc_res, "bugs": rbugs, "verdict": verdict})
+    timed = sorted((c for c in (run or {}).get("cases", []) if "duration_ms" in c),
+                   key=lambda c: c["duration_ms"], reverse=True)
     return {
+        "timing": {"runs": _run_history(change), "slowest": [{"tc": c["tc_id"], "ms": c["duration_ms"]} for c in timed[:5]]},
         "change_id": change.id, "stage": change.state["stage"], "generated_at": now_iso(),
         "head": head, "run_id": run_id, "run_valid": run_valid,
         "run_issues": [str(i) for i in run_issues], "rows": rows,
@@ -49,6 +52,17 @@ def build(change) -> dict:
                   "fix_attempts": b.meta.get("fix_attempts")} for b in all_bugs],
         "validate_errors": len(rep.errors), "validate_blockers": len(rep.blockers),
     }
+
+
+def _run_history(change) -> list[dict]:
+    """변경의 모든 RUN 소요 시간 (duration_ms 가 없는 이전 RUN 은 None)."""
+    out = []
+    for p in sorted(change.evidence_dir.glob("RUN-*.json")):
+        run = evidence.load_run(change, p.stem)
+        if run:
+            out.append({"run": run["run_id"], "scope": run.get("scope", "full"), "ms": run.get("duration_ms"),
+                        "cases": len(run.get("cases", []))})
+    return out
 
 
 def _pct(x):
@@ -94,6 +108,12 @@ def write_markdown(change, data: dict) -> list[str]:
     for r in data["rows"]:
         for tc, res in (r["tcs"] or {"-": "NOT_RUN"}).items():
             q.append(f"| {r['req']} | {tc} | {res} | {data['run_id'] or '-'} | {', '.join(r['bugs']) or '-'} |")
+    t = data["timing"]
+    if t["runs"]:
+        q += ["", "## Timing", "| RUN | 범위 | 소요(초) | 케이스 |", "|---|---|---|---|"]
+        q += [f"| {r['run']} | {r['scope']} | {'-' if r['ms'] is None else round(r['ms'] / 1000, 1)} | {r['cases']} |" for r in t["runs"]]
+        if t["slowest"]:
+            q += ["", "- 느린 TC: " + ", ".join(f"{x['tc']} {x['ms'] / 1000:.1f}s" for x in t["slowest"])]
     q += ["", "## Deviations",
           *([f"- {i}" for i in data["run_issues"]] or ["- 증거 무효 사유 없음"]), "",
           "## Verdict", f"- {verdict}",

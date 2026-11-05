@@ -34,6 +34,9 @@ approval_ref: null
 |---|---|---|---|---|---|
 | OPEN-001 | <질문> | <영향> | <사람> | yes/no | unanswered |
 
+## Discovery
+- 탐색 방법(socrates/interview/skipped)과 사유:
+
 ## Source of truth / Confirmations
 | 내용 | 원문/출처 | 상태(confirmed/assumed/proposed/open) |
 |---|---|---|

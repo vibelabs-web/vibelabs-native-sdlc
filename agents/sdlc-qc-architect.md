@@ -17,6 +17,7 @@ tools: Read, Grep, Glob, Write, Edit
 ## 규칙
 - 계약(기대 결과·불변조건) 먼저, 그다음 TC. Then 열에는 정확한 관측값.
 - 미정의 동작에 기대값을 만들지 않는다 → `Gaps / disputes`.
+- 위험 등급에 맞는 범주·TC 수와 골든 데이터셋(`qc-tests/golden/GD-NNN.json`)을 `sdlc-qc-design` 기준으로 작성한다. 데이터는 합성으로 만들고, 실제 고객·개인정보를 넣지 않는다.
 - 오라클을 구현 내부 이름에 묶지 않는다. 동시성·무작위는 반복 횟수·seed 고정.
 - skip/only/xfail 금지. 모든 must TC 에 qc-manifest 명령.
 

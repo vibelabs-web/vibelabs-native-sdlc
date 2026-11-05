@@ -35,6 +35,8 @@ def verify(change, run: dict, head: str | None) -> list[Issue]:
         return issues
     if run["report_sha256"] != report_digest(run):
         issues.append(err("EVIDENCE_TAMPERED", f"{rid} 내용이 기록 이후 변경됨 (report_sha256 불일치)", f))
+    if run.get("scope", "full") != "full":
+        issues.append(err("EVIDENCE_PARTIAL", f"{rid} 는 재검증(부분) 실행 — 게이트에는 전체 실행 RUN 만 유효", f))
     if run["change_id"] != change.id:
         issues.append(err("EVIDENCE_WRONG_CHANGE", f"{rid} 는 {run['change_id']} 의 증거", f))
     if not run["commit_sha"]:
@@ -53,7 +55,7 @@ def verify(change, run: dict, head: str | None) -> list[Issue]:
         if baselines.get(art) != run.get(field):
             issues.append(err("STALE_EVIDENCE_BASELINE",
                               f"{rid} 의 {art} 해시가 현재 승인 기준선과 다름 — 이전 기준선 증거 재사용 금지", f))
-    for c in run["commands"]:
+    for c in [*run["commands"], *run.get("setup", [])]:
         try:
             lp = safe_join(change.dir, c["log_path"])
         except PathEscape as e:

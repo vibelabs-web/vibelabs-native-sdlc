@@ -5,7 +5,7 @@ from dataclasses import dataclass, field
 
 from core import bugs, state as sm
 from core.util import read_json
-from validators import artifacts, schema, tamper, traceability
+from validators import artifacts, golden, schema, tamper, traceability
 from validators.issues import Issue, blocker, err, warn
 from validators.paths import PathEscape, safe_join
 
@@ -75,10 +75,27 @@ def validate(change) -> Report:
         rep.index = traceability.build_index(parsed["spec"], parsed.get("plan"), parsed.get("test_spec"))
 
     _check_manifest(change, rep, want("qc_manifest", "PLAN_TEST_DRAFT"))
+    if _stage_at_least(stage, "PLAN_TEST_DRAFT"):
+        rep.issues += golden.check(change, rep.index, rep.manifest)
+        rep.issues += _check_tc_budget(change, rep.index)
     _check_baselines(change, rep)
     rep.issues += tamper.check(change)
     rep.issues += bugs.validate(change)
     return rep
+
+
+# must REQ 당 TC 수 경고 기준 (초기 추정값 — RUN 소요 시간이 쌓이면 조정). high 는 상한 없음.
+TC_BUDGET = {"lite": 1, "standard": 3}
+
+
+def _check_tc_budget(change, index: dict | None) -> list[Issue]:
+    limit = TC_BUDGET.get(change.state.get("risk_level"))
+    if limit is None or not index:
+        return []
+    return [warn("QC_TC_OVER_BUDGET",
+                 f"필수 {rid} 의 TC {len(v['tcs'])}개 > {change.state['risk_level']} 기준 {limit}개 — 위험 대비 과한지 검토",
+                 "test-spec.md")
+            for rid, v in index["reqs"].items() if v["must"] and len(v["tcs"]) > limit]
 
 
 def _check_manifest(change, rep: Report, wanted: bool) -> None:
@@ -104,6 +121,11 @@ def _check_manifest(change, rep: Report, wanted: bool) -> None:
             safe_join(change.project.root, c.get("cwd", "."))
         except PathEscape as e:
             rep.issues.append(err("MANIFEST_PATH", f"{c['tc_id']}: {e}", p.name))
+    for n, step in enumerate(man.get("setup") or [], start=1):
+        try:
+            safe_join(change.project.root, step.get("cwd", "."))
+        except PathEscape as e:
+            rep.issues.append(err("MANIFEST_PATH", f"setup {n}: {e}", p.name))
     if rep.index:
         tcs = rep.index["tcs"]
         mapped = {c["tc_id"] for c in man["cases"]}

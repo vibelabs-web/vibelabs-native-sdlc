@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "qc-tests/golden/GD-NNN.json — 입력과 기대값 쌍 (QC 소유, 합성 데이터)",
+  "type": "object",
+  "required": ["id", "req_ids", "tc_ids", "provenance", "source_ref", "input", "expected"],
+  "additionalProperties": false,
+  "properties": {
+    "id": {"type": "string", "pattern": "^GD-\\d+$"},
+    "req_ids": {"type": "array", "items": {"type": "string", "pattern": "^REQ-\\d+$"}},
+    "tc_ids": {"type": "array", "items": {"type": "string", "pattern": "^TC-\\d+$"}},
+    "provenance": {"type": "string", "enum": ["spec-derived", "synthetic", "approved-sample"]},
+    "source_ref": {"type": "string", "minLength": 1},
+    "input": {},
+    "expected": {}
+  }
+}

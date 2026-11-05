@@ -1,0 +1,23 @@
+{
+  "id": "GD-003",
+  "req_ids": [
+    "REQ-003"
+  ],
+  "tc_ids": [
+    "TC-003"
+  ],
+  "provenance": "spec-derived",
+  "source_ref": "spec.md REQ-003",
+  "input": {
+    "confirmed_before": 30,
+    "waitlist_before": [
+      "w1"
+    ],
+    "cancel": "p05"
+  },
+  "expected": {
+    "confirmed_count": 30,
+    "promoted": "w1",
+    "waitlist": []
+  }
+}

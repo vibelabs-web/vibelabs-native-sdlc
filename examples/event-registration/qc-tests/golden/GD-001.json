@@ -1,0 +1,20 @@
+{
+  "id": "GD-001",
+  "req_ids": [
+    "REQ-001"
+  ],
+  "tc_ids": [
+    "TC-001"
+  ],
+  "provenance": "spec-derived",
+  "source_ref": "spec.md REQ-001",
+  "input": {
+    "confirmed_before": 29,
+    "register": "new"
+  },
+  "expected": {
+    "result": "confirmed",
+    "confirmed_count": 30,
+    "waitlist": []
+  }
+}

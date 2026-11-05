@@ -260,13 +260,20 @@ def cmd_build_check(args):
 
 def cmd_qc_run(args):
     ch = project(args).load(args.change_id)
-    r = runner.run(ch, isolated=args.isolated, allow_dirty=args.allow_dirty)
+    r = runner.run(ch, isolated=args.isolated, allow_dirty=args.allow_dirty, retest=args.retest)
     run = r["run"]
-    lines = [f"{run['run_id']} @ {run['commit_sha'][:12]} ({run['environment']})"]
+    lines = [f"{run['run_id']} @ {run['commit_sha'][:12]} ({run['environment']}) "
+             f"scope={run['scope']} {run['duration_ms'] / 1000:.1f}s"]
     lines += [f"  {c['tc_id']}: {c['result']}  {c['summary']}" for c in run["cases"]]
     lines += [f"  · {e}" for e in r["bug_events"]]
-    fails = [c for c in run["cases"] if c["result"] != "PASS"]
-    lines.append("다음: " + (f"`sdlc gate {ch.id} DEFECT_OPEN`" if bugs_open(ch) else f"`sdlc gate {ch.id} QC_PASSED`"))
+    fails = [c for c in run["cases"] if c["result"] != "PASS" and c.get("skipped_by") != "risk"]
+    if bugs_open(ch):
+        nxt = f"`sdlc gate {ch.id} DEFECT_OPEN`"
+    elif args.retest:
+        nxt = f"`sdlc qc run {ch.id} --isolated` (재검증 통과 — 게이트에는 최종 SHA 의 전체 실행이 필요)"
+    else:
+        nxt = f"`sdlc gate {ch.id} QC_PASSED`"
+    lines.append("다음: " + nxt)
     out(args, r, "\n".join(lines))
     return 1 if fails else 0
 
@@ -472,6 +479,8 @@ def build_parser() -> argparse.ArgumentParser:
     qr.add_argument("change_id")
     qr.add_argument("--isolated", action="store_true", help="임시 git worktree 에서 실행")
     qr.add_argument("--allow-dirty", action="store_true", help="미커밋 상태 실행 (증거는 게이트 무효)")
+    qr.add_argument("--retest", action="store_true",
+                    help="미해결 BUG 의 TC + 같은 regression_group 만 실행 (부분 증거 — 게이트 통과 불가)")
 
     sp = sub.add_parser("bug", help="결함 티켓")
     bsub = sp.add_subparsers(dest="bug_cmd", required=True)
