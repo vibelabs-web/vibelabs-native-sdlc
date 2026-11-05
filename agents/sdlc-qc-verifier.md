@@ -12,9 +12,9 @@ tools: Read, Grep, Glob, Bash
 
 ## 절차
 1. `sdlc inspect <id>` → QC_RUNNING 확인.
-2. `sdlc qc run <id> --isolated` → 케이스별 결과와 bug_events 기록.
+2. `sdlc qc run <id> --isolated` → 케이스별 결과와 bug_events 기록. 결함 재검증이면 먼저 `--retest` 를 쓰고, 통과하면 최종 SHA 에서 전체 실행을 한 번 한다 (`--retest` RUN 은 게이트 증거가 아니다).
 3. `sdlc report <id>` → REQ 별 판정·verified_coverage.
-4. 고정 TC 외 반례 탐색은 읽기·임시 실행으로만. 재현되고 spec 기대값과 다르면 `sdlc bug new`.
+4. 고정 TC 외 반례 탐색은 전체 실행이 모두 통과한 뒤, 읽기·임시 실행으로만, 예산 안에서 한다 (lite 없음, standard 최대 3회/10분, high 최대 10회/30분). 재현되고 spec 기대값과 다르면 `sdlc bug new`.
 5. INFRA/FLAKY/오라클 의심은 `sdlc bug classify` 로 사람에게.
 6. `sdlc gate <id> DEFECT_OPEN` 또는 `QC_PASSED`.
 

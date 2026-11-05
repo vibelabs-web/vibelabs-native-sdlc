@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-017",
+  "title": "모호한 신규 기능 요청 + socrates 설치됨",
+  "mode": "manual",
+  "pass_criteria": "socrates 호출, 사용자 발언만 confirmed",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "how_to_judge": "전사에서 (1) 메인 세션의 socrates 호출 (2) /screen-spec·구현으로 넘어가지 않음 (3) intent 의 confirmed 항목이 사용자 발언에 근거하고 AI 제안은 proposed/assumed 인지 (4) Discovery 기록을 확인"
+}

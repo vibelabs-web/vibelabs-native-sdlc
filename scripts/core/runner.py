@@ -14,6 +14,8 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 from core import bugs, gitutil, hashing
@@ -34,7 +36,57 @@ def _classify(code: int | None, output: str) -> str:
     return "PASS"
 
 
-def run(change, *, isolated: bool = False, allow_dirty: bool = False, timeout: int | None = None) -> dict:
+def _select_cases(change, man: dict, rep, retest: bool) -> tuple[list[dict], dict[str, str]]:
+    """이번 실행에 돌릴 케이스와, 등급 정책으로 생략한 TC({tc: 사유})를 고른다.
+
+    미해결 BUG 에 연결된 TC 는 어떤 경우에도 생략하지 않는다.
+    """
+    cases = man["cases"]
+    open_tcs = {t for b in bugs.load_all(change) if not b.resolved for t in (b.meta.get("test_ids") or [])}
+    if retest:
+        groups = {c["regression_group"] for c in cases if c["tc_id"] in open_tcs and c.get("regression_group")}
+        chosen = [c for c in cases if c["tc_id"] in open_tcs or c.get("regression_group") in groups]
+        if not chosen:
+            raise SdlcError("재검증 대상 TC 없음 — 미해결 BUG 에 연결된 TC 가 없습니다. 전체 실행을 쓰세요 (--retest 없이)")
+        return chosen, {}
+    if change.state.get("risk_level") != "lite" or not rep.index:
+        return cases, {}
+    idx = rep.index
+    must = {tc for tc, v in idx["tcs"].items() if any(idx["reqs"].get(r, {}).get("must") for r in v["reqs"])}
+    chosen = [c for c in cases if c["tc_id"] in must | open_tcs]
+    picked = {c["tc_id"] for c in chosen}
+    return chosen, {c["tc_id"]: "lite 등급 — 비필수 TC 생략" for c in cases if c["tc_id"] not in picked}
+
+
+def _exec(cmd: list[str], cwd: Path, env: dict, tmo: int) -> tuple[int | None, str, int]:
+    t0 = time.monotonic()
+    try:
+        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=tmo, env=env)
+        code, out = p.returncode, p.stdout + p.stderr
+    except FileNotFoundError as e:
+        code, out = None, f"INFRA: 명령 없음 {e}"
+    except subprocess.TimeoutExpired:
+        code, out = None, f"INFRA: {tmo}s 시간 초과"
+    return code, out, int((time.monotonic() - t0) * 1000)
+
+
+def _run_setup(change, man: dict, workdir: Path, log_dir: Path, env: dict) -> tuple[list[dict], str | None]:
+    """manifest setup 을 한 번만 순서대로 실행한다. 실패하면 (기록, 실패 사유)."""
+    tmo = int(man.get("setup_timeout_seconds", 900))
+    records: list[dict] = []
+    for n, step in enumerate(man.get("setup") or [], start=1):
+        code, out, ms = _exec(step["cmd"], safe_join(workdir, step.get("cwd", ".")), env, tmo)
+        log = log_dir / f"setup-{n}.log"
+        atomic_write_text(log, out)
+        records.append({"cmd": " ".join(step["cmd"]), "exit_code": code, "duration_ms": ms,
+                        "log_path": log.relative_to(change.dir).as_posix(), "log_sha256": hashing.sha256_file(log)})
+        if code != 0:
+            return records, f"setup {n}단계 실패 (exit {code}) — {log.name} 참조"
+    return records, None
+
+
+def run(change, *, isolated: bool = False, allow_dirty: bool = False, timeout: int | None = None,
+        retest: bool = False) -> dict:
     st = change.state
     root = change.project.root
     if st["stage"] != "QC_RUNNING":
@@ -50,6 +102,7 @@ def run(change, *, isolated: bool = False, allow_dirty: bool = False, timeout: i
         raise SdlcError("기준선/오라클 오류 상태에서 QC 실행 거부:\n" + "\n".join(str(i) for i in rep.errors))
     man = read_json(change.path("qc_manifest"))
     tmo = timeout or int(man.get("timeout_seconds", 300))
+    selected, skipped = _select_cases(change, man, rep, retest)
 
     n = change.next_counter("run")
     run_id = f"RUN-{n:03d}"
@@ -69,37 +122,47 @@ def run(change, *, isolated: bool = False, allow_dirty: bool = False, timeout: i
         shutil.copy2(change.path("qc_manifest"), dest / "qc-manifest.json")
         workdir = wt
 
+    base_env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1",
+                "SDLC_CHANGE_DIR": str(workdir / change.dir.relative_to(root))}
+
+    def run_case(c: dict) -> tuple[dict, dict]:
+        tc = c["tc_id"]
+        code, out, ms = _exec(c["cmd"], safe_join(workdir, c.get("cwd", ".")), {**base_env, "SDLC_TC_ID": tc}, tmo)
+        log = log_dir / f"{tc}.log"
+        atomic_write_text(log, out)
+        evidence_path = log.relative_to(change.dir).as_posix()
+        return ({"tc_id": tc, "cmd": " ".join(c["cmd"]), "exit_code": code, "log_path": evidence_path,
+                 "log_sha256": hashing.sha256_file(log)},
+                {"tc_id": tc, "result": _classify(code, out), "evidence": evidence_path, "duration_ms": ms,
+                 "summary": out.strip().splitlines()[-1][:200] if out.strip() else ""})
+
     started = now_iso()
-    commands, cases = [], []
+    t0 = time.monotonic()
+    commands, cases, setup = [], [], []
     try:
-        for c in man["cases"]:
-            tc = c["tc_id"]
-            cwd = safe_join(workdir, c.get("cwd", "."))
-            env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "SDLC_TC_ID": tc,
-                   "SDLC_CHANGE_DIR": str(workdir / change.dir.relative_to(root))}
-            try:
-                p = subprocess.run(c["cmd"], cwd=cwd, capture_output=True, text=True, timeout=tmo, env=env)
-                code, out = p.returncode, p.stdout + p.stderr
-            except FileNotFoundError as e:
-                code, out = None, f"INFRA: 명령 없음 {e}"
-            except subprocess.TimeoutExpired:
-                code, out = None, f"INFRA: {tmo}s 시간 초과"
-            log = log_dir / f"{tc}.log"
-            atomic_write_text(log, out)
-            result = _classify(code, out)
-            commands.append({"tc_id": tc, "cmd": " ".join(c["cmd"]), "exit_code": code,
-                             "log_path": log.relative_to(change.dir).as_posix(),
-                             "log_sha256": hashing.sha256_file(log)})
-            cases.append({"tc_id": tc, "result": result, "evidence": log.relative_to(change.dir).as_posix(),
-                          "summary": out.strip().splitlines()[-1][:200] if out.strip() else ""})
+        setup, setup_error = _run_setup(change, man, workdir, log_dir, base_env)
+        if setup_error:
+            # 환경 문제이지 제품 결함이 아니다 — BLOCKED 로 남기고 BUG 는 만들지 않는다
+            cases = [{"tc_id": c["tc_id"], "result": "BLOCKED", "evidence": None, "summary": f"INFRA: {setup_error}"}
+                     for c in selected]
+        else:
+            workers = min(int(man.get("max_parallel", 1)), len(selected)) or 1
+            with ThreadPoolExecutor(max_workers=workers) as pool:
+                # map 은 입력 순서를 유지한다 — 증거의 케이스 순서는 병렬이어도 manifest 순서
+                for command, case in pool.map(run_case, selected):
+                    commands.append(command)
+                    cases.append(case)
     finally:
         if wt is not None:
             gitutil.worktree_remove(root, wt)
             shutil.rmtree(wt, ignore_errors=True)
 
-    mapped = {c["tc_id"] for c in cases}
-    for tc in sorted(set((rep.index or {}).get("tcs", {})) - mapped):
-        cases.append({"tc_id": tc, "result": "NOT_RUN", "evidence": None, "summary": "qc-manifest 에 실행 명령 없음"})
+    cases += [{"tc_id": tc, "result": "NOT_RUN", "evidence": None, "summary": why, "skipped_by": "risk"}
+              for tc, why in skipped.items()]
+    if not retest:
+        mapped = {c["tc_id"] for c in cases}
+        for tc in sorted(set((rep.index or {}).get("tcs", {})) - mapped):
+            cases.append({"tc_id": tc, "result": "NOT_RUN", "evidence": None, "summary": "qc-manifest 에 실행 명령 없음"})
 
     b = st.get("baselines", {})
     run_doc = {
@@ -109,13 +172,15 @@ def run(change, *, isolated: bool = False, allow_dirty: bool = False, timeout: i
         "environment": f"{'isolated-worktree' if isolated else 'local-cwd'}:{platform.system().lower()}"
                        f"-py{platform.python_version()}",
         "worktree_dirty": bool(dirty), "started_at": started, "finished_at": now_iso(),
-        "commands": commands, "cases": cases, "verifier_role": "qc-verifier",
+        "scope": "retest" if retest else "full", "duration_ms": int((time.monotonic() - t0) * 1000),
+        "setup": setup, "commands": commands, "cases": cases, "verifier_role": "qc-verifier",
         "evidence_level": "E1",
     }
     run_doc["report_sha256"] = evidence.report_digest(run_doc)
     atomic_write_json(evidence.run_path(change, run_id), run_doc)
-    st["last_verification_run"] = run_id
-    change.record("qc_run", run=run_id, commit=head,
+    if not retest:  # 부분 실행은 게이트 증거가 될 수 없다
+        st["last_verification_run"] = run_id
+    change.record("qc_run", run=run_id, commit=head, scope=run_doc["scope"],
                   results={c["tc_id"]: c["result"] for c in cases})
     bug_events = _update_bugs(change, run_doc, rep)
     change.save()

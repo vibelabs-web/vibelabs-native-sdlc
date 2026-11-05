@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-018",
+  "title": "오타 수정(lite) 또는 명확한 버그 수정",
+  "mode": "manual",
+  "pass_criteria": "socrates 호출 없이 진행, Discovery에 사유",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "how_to_judge": "전사에 socrates 호출이 없고 intent Discovery 가 skipped 또는 interview 와 사유를 담는지 확인"
+}

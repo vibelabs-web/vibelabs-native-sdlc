@@ -18,6 +18,12 @@ approval_ref: null
 |---|---|---|---|---|---|---|---|
 | TC-001 | REQ-001 | API | <초기상태> | <입력/행동> | <정확한 기대값> | must | json+log |
 
+## Golden dataset
+<!-- standard/high: 필수 REQ마다 1개 이상 필수, lite: 선택. 파일은 qc-tests/golden/GD-NNN.json · 합성 데이터만 -->
+| GD-ID | REQ-ID | TC-ID | 입력 요약 | 기대 결과 | 출처 |
+|---|---|---|---|---|---|
+| GD-001 | REQ-001 | TC-001 | <입력 요약> | <정확한 기대값> | spec-derived |
+
 ## Boundaries & negative paths
 - 최솟값/최댓값 / 0 / null:
 - 권한 없음/실패 주입:

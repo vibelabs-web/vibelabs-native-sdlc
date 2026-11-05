@@ -1,0 +1,8 @@
+{
+  "id": "EVAL-019",
+  "title": "모호한 신규 기능 요청 + socrates 미설치",
+  "mode": "manual",
+  "pass_criteria": "멈추지 않고 기본 인터뷰로 진행, Discovery에 사유",
+  "source": "docs/05_평가_검증_시나리오.md",
+  "how_to_judge": "socrates 없는 환경의 전사에서 오류로 멈추지 않고 질문 1~2개씩 인터뷰하며 Discovery 에 미설치 사유가 있는지 확인"
+}

@@ -23,7 +23,7 @@ sdlc() { python3 "$SDLC/scripts/sdlc.py" "$@"; }  # 대상 프로젝트 루트�
 
 | stage | 스킬 | 에이전트 | 끝나는 조건 (게이트) |
 |---|---|---|---|
-| INTENT_DRAFT | `sdlc-intent` | `sdlc-planner` | `sdlc gate <id> INTENT_APPROVED` = ALLOW |
+| INTENT_DRAFT | `sdlc-intent` (조건이 맞으면 메인 세션에서 `socrates` 먼저) | `sdlc-planner` | `sdlc gate <id> INTENT_APPROVED` = ALLOW |
 | INTENT_APPROVED · SPEC_DRAFT | `sdlc-spec` | `sdlc-spec-writer` | `SPEC_APPROVED` = ALLOW |
 | SPEC_APPROVED · PLAN_TEST_DRAFT | `sdlc-plan` **와** `sdlc-qc-design` (병렬·독립) | `sdlc-planner` / `sdlc-qc-architect` | `BASELINE_APPROVED` = ALLOW |
 | BASELINE_APPROVED · BUILDING · DEFECT_OPEN | `sdlc-build` | `sdlc-builder` | `QC_RUNNING` = ALLOW |

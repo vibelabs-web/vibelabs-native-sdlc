@@ -2,6 +2,7 @@
 
 구현 내부가 아니라 spec 의 공개 계약(Event 의 register/cancel/confirmed/waitlist)만 사용한다.
 """
+import json
 import os
 import sys
 import threading
@@ -15,6 +16,14 @@ sys.path.insert(0, str(ROOT / "app"))
 from registration import Event  # noqa: E402
 
 
+GOLDEN = Path(__file__).resolve().parent / "golden"
+
+
+def golden(case_id: str) -> tuple[dict, dict]:
+    doc = json.loads((GOLDEN / f"{case_id}.json").read_text(encoding="utf-8"))
+    return doc["input"], doc["expected"]
+
+
 def filled(n: int) -> Event:
     e = Event(capacity=30)
     for i in range(n):
@@ -23,31 +32,36 @@ def filled(n: int) -> Event:
 
 
 class TC001(unittest.TestCase):
-    """REQ-001: 29명 확정 상태에서 1명 신청 → 확정 30명."""
+    """REQ-001: 29명 확정 상태에서 1명 신청 → 확정 30명 (GD-001)."""
     def test(self):
-        e = filled(29)
-        self.assertEqual(e.register("new"), "confirmed")
-        self.assertEqual(len(e.confirmed()), 30)
+        given, want = golden("GD-001")
+        e = filled(given["confirmed_before"])
+        self.assertEqual(e.register(given["register"]), want["result"])
+        self.assertEqual(len(e.confirmed()), want["confirmed_count"])
+        self.assertEqual(e.waitlist(), want["waitlist"])
 
 
 class TC002(unittest.TestCase):
-    """REQ-002: 30명 확정 상태에서 31번째 신청 → 확정 30명, 대기 1명(1번)."""
+    """REQ-002: 30명 확정 상태에서 31번째 신청 → 확정 30명, 대기 1명(1번) (GD-002)."""
     def test(self):
-        e = filled(30)
-        self.assertEqual(e.register("w1"), "waitlisted")
-        self.assertEqual(len(e.confirmed()), 30)
-        self.assertEqual(e.waitlist(), ["w1"])
+        given, want = golden("GD-002")
+        e = filled(given["confirmed_before"])
+        self.assertEqual(e.register(given["register"]), want["result"])
+        self.assertEqual(len(e.confirmed()), want["confirmed_count"])
+        self.assertEqual(e.waitlist(), want["waitlist"])
 
 
 class TC003(unittest.TestCase):
-    """REQ-003: 30명 확정 + 대기 1명에서 참가자 1명 취소 → 확정 30명, 대기 1번 승격."""
+    """REQ-003: 30명 확정 + 대기 1명에서 참가자 1명 취소 → 확정 30명, 대기 1번 승격 (GD-003)."""
     def test(self):
-        e = filled(30)
-        e.register("w1")
-        e.cancel("p05")
-        self.assertEqual(len(e.confirmed()), 30)
-        self.assertIn("w1", e.confirmed())
-        self.assertEqual(e.waitlist(), [])
+        given, want = golden("GD-003")
+        e = filled(given["confirmed_before"])
+        for name in given["waitlist_before"]:
+            e.register(name)
+        e.cancel(given["cancel"])
+        self.assertEqual(len(e.confirmed()), want["confirmed_count"])
+        self.assertIn(want["promoted"], e.confirmed())
+        self.assertEqual(e.waitlist(), want["waitlist"])
 
 
 class TC004(unittest.TestCase):

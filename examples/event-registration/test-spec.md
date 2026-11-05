@@ -17,5 +17,12 @@ approval_ref: null
 | TC-003 | REQ-003 | 30명 확정+대기 1명 | 기존 참가자 1명 취소 | 확정 30명, 대기 1번 승격 | API |
 | TC-004 | REQ-001 | 확정 29명, 병렬 요청 2개 | 동시에 신청 | 확정 30명 이하 | 동시성 |
 
+## Golden dataset
+| GD-ID | REQ-ID | TC-ID | 입력 요약 | 기대 결과 | 출처 |
+|---|---|---|---|---|---|
+| GD-001 | REQ-001 | TC-001 | 확정 29명 + 신청 1명 | confirmed, 확정 30명 | spec-derived |
+| GD-002 | REQ-002 | TC-002 | 확정 30명 + 신청 1명 | waitlisted, 대기 [w1] | spec-derived |
+| GD-003 | REQ-003 | TC-003 | 확정 30명 + 대기 1명, 취소 1명 | 확정 30명, w1 승격 | spec-derived |
+
 ## Pending
 중복 신청 처리는 요구사항 미정이므로 TC의 기대값을 확정하지 않는다.

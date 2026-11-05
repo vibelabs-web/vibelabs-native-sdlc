@@ -15,7 +15,7 @@
 | `gate <id> <STAGE> [--dry-run] [--json]` | 전이 판정, ALLOW 면 적용 | 0 ALLOW / 1 BLOCK / 3 MANUAL |
 | `reopen <id> --to INTENT_DRAFT\|SPEC_DRAFT\|PLAN_TEST_DRAFT --reason R` | 재기준화: 해당 승인·기준선·잠금 제거, 이전 RUN stale | 0/2 |
 | `build check <id> -- <cmd>` | Builder 자체 검사 기록 (QC_RUNNING 조건) | 명령 exit |
-| `qc run <id> [--isolated] [--allow-dirty]` | 고정 SHA QC 실행 → RUN 증거, BUG 발행·재검증 | 0 전부 PASS / 1 |
+| `qc run <id> [--isolated] [--allow-dirty] [--retest]` | 고정 SHA QC 실행 → RUN 증거, BUG 발행·재검증. `--retest` 는 미해결 BUG 의 TC 와 같은 회귀 그룹만 실행(게이트 증거 아님) | 0 전부 PASS / 1 |
 | `bug list\|new\|transition\|classify` | 결함 티켓 | 0/2 |
 | `bug comment <id> BUG --role R --body T` | QC·Builder 대화 (로컬 Discussion + Issue 댓글) | 0 |
 | `bug sync <id> [--dry-run]` | BUG ↔ GitHub Issue 동기화 | 0 / 3 GitHub 불가 |

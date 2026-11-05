@@ -76,7 +76,8 @@ QC 에서 FAIL 이 나오면 하네스가 `issues/BUG-NNN.md` 를 자동으로 �
    ```bash
    sdlc bug transition CHG-DEMO-001 BUG-001 --to ready_for_retest --role builder
    sdlc build check CHG-DEMO-001 -- python3 -m unittest discover -s app
-   sdlc gate CHG-DEMO-001 QC_RUNNING && sdlc qc run CHG-DEMO-001 --isolated   # RUN-002, 전체 TC 재실행
+   sdlc gate CHG-DEMO-001 QC_RUNNING && sdlc qc run CHG-DEMO-001 --isolated --retest   # RUN-002, 결함 TC 만 재검증
+   sdlc qc run CHG-DEMO-001 --isolated   # RUN-003, 최종 SHA 전체 실행 (게이트 증거)
    ```
    같은 SHA 로 재실행하면 verified_fixed 가 되지 않는다. 수정 시도가 3번 실패하면 `escalated` 가 되고 자동 루프가 멈춘다 — 사람이 결정한다.
 
