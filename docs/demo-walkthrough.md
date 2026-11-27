@@ -11,7 +11,7 @@ sdlc() { python3 "$H/scripts/sdlc.py" "$@"; }
 mkdir sdlc-demo && cd sdlc-demo
 git init -q && git config user.name "<이름>" && git config user.email "<메일>"
 sdlc demo-init --change-id CHG-DEMO-001
-git add -A && git commit -qm "demo init"
+git add .gitignore .sdlc app && git commit -qm "demo init"   # 파일을 지정해 stage — git add -A 는 비밀·무관 파일이 섞인다
 sdlc inspect CHG-DEMO-001
 ```
 

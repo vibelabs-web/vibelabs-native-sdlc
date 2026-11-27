@@ -24,11 +24,18 @@ def head(root: Path) -> str | None:
     return sha if r.returncode == 0 and len(sha) == 40 else None
 
 
+# 코드가 아닌 도구 산출물 — 미커밋이어도 QC 를 막지 않는다.
+# Claude Labs 훅이 프로젝트에 남기는 것: 세션 요약(.claude/memory) · docs Markdown 의 HTML 사본(docs/_html) ·
+# stargate 하위 스킬 표식(.stargate) · Orca 하네스 상태(.orca-harness). 코드 revision 판정과 무관하다.
+TOOL_ARTIFACTS = (".claude/memory", "docs/_html", ".stargate", ".orca-harness")
+
+
 def dirty_paths(root: Path) -> list[str] | None:
-    """`.sdlc/` 밖의 미커밋 변경 경로. git 이 아니면 None."""
+    """`.sdlc/` 와 도구 산출물(TOOL_ARTIFACTS) 밖의 미커밋 변경 경로. git 이 아니면 None."""
     if not is_repo(root):
         return None
-    r = _git(root, "status", "--porcelain", "--untracked-files=all", "--", ".", ":(exclude).sdlc")
+    excludes = [":(exclude).sdlc", *(f":(exclude){p}" for p in TOOL_ARTIFACTS)]
+    r = _git(root, "status", "--porcelain", "--untracked-files=all", "--", ".", *excludes)
     if r.returncode != 0:
         return None
     return [line[3:] for line in r.stdout.splitlines() if line.strip()]

@@ -25,8 +25,8 @@ description: SDLC 하네스 1단계 — 자연어 요청을 인터뷰해 .sdlc/c
 소크라테스를 쓸 때:
 
 1. **메인 세션에서 실행한다.** `sdlc-planner` 에게는 Skill·AskUserQuestion 도구가 없다.
-2. `.stargate/dispatching` 이 없으면 만들어 둔다 (`mkdir -p .stargate && touch .stargate/dispatching`). 소크라테스가 문서 생성 후 다음 단계를 묻거나 `/screen-spec` 으로 이어가지 않고 돌아오게 하는 표식이다. 원래 있던 표식은 건드리지 않는다.
-3. 문서 생성이 끝나면 직접 만든 표식만 지우고, 비어 있으면 `.stargate/` 도 지운다. 구현·화면 설계로 넘어가지 않는다.
+2. `.stargate/dispatching` 이 없으면 만들어 둔다: `mkdir -p .stargate && echo "$(date +%s) socrates" > .stargate/dispatching`. 소크라테스가 문서 생성 후 다음 단계를 묻거나 `/screen-spec` 으로 이어가지 않고 돌아오게 하는 표식이다. 형식은 `<시각> <스킬>` — Claude Labs 훅(fix-blocker)이 이 이름으로 하위 스킬의 연쇄 호출을 막는다(빈 파일이면 막지 못한다). 원래 있던 표식은 건드리지 않는다.
+3. 문서 생성이 끝나면 직접 만든 표식만 지운다(내용이 `<시각> socrates` 로 직접 쓴 것과 같을 때만). `.stargate/` 가 비면 그것도 지운다. 구현·화면 설계로 넘어가지 않는다.
 4. `sdlc-planner` 에게 생성된 `docs/planning/*.md` 경로를 입력으로 주어 intent.md 를 쓰게 한다. 기획 문서는 intent 와 함께 커밋한다.
 5. 옮길 때 태그를 구분한다: 사용자가 직접 말한 것만 `confirmed`, AI 가 제안한 것은 `proposed`/`assumed`, 미결정은 `OPEN-NNN`. 소크라테스 문서에 적혀 있다는 이유로 `confirmed` 가 되지 않는다.
 
