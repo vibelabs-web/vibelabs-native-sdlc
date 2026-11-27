@@ -67,6 +67,17 @@ class GateFlowTest(SandboxCase):
         with self.assertRaises(SdlcError):
             runner.run(ch)
 
+    def test_tool_artifacts_are_not_dirty(self):
+        # Claude Labs 훅이 프로젝트에 남기는 산출물(세션 요약 · docs HTML 사본 · 하네스 표식)은 코드가 아니다 — QC 를 막지 않는다
+        ch = self.sb.demo()
+        ch, _ = fx.advance(self.sb, ch)
+        for rel in (".claude/memory/last-session.json", "docs/_html/plan.html", ".stargate/dispatching", ".orca-harness/run.json"):
+            f = self.sb.root / rel
+            f.parent.mkdir(parents=True, exist_ok=True)
+            f.write_text("{}\n")
+        runner.run(ch)   # DIRTY_WORKTREE 로 막히지 않아야 한다
+        self.assertEqual(g.gate(self.sb.reload(ch), "QC_PASSED").decision, g.ALLOW)
+
     def test_dirty_evidence_is_unusable(self):
         ch = self.sb.demo()
         ch, _ = fx.advance(self.sb, ch)
